@@ -1,106 +1,119 @@
 # DESIGN.md: data.chain.link (Chainlink Data Feeds)
 
 ## Source
-- URL: https://data.chain.link/ dan https://data.chain.link/feeds
-- Capture date: 2026-09-07 (UTC)
-- Evidence: Firecrawl `branding` + `markdown` + `summary` scrape (2 halaman), screenshot full-page `/feeds` (lokal: `./assets/chainlink-data-feeds.png`)
-- Batasan: HTML mentah hanya shell JS tanpa `<style>`/CSS file (28 CSS vars yang terbaca hanya milik toast/sidebar), `firecrawl_interact` timeout, `webfetch` kena 429. Nilai yang tidak terukur diberi label **inferred** (aproksimasi dari screenshot); sisanya **observed** (dari output scrape terstruktur).
+- URL: `https://data.chain.link/`, `/feeds`, `/feeds/ethereum/mainnet/eth-usd`
+- Riset v1 (2026-09-07): Firecrawl `branding` + `markdown` + `summary` (confidence warna 0.9, tombol 0.2)
+- Riset v2 (2026-09-08, browser-use tab `10CEEE4A…`): computed style + 314 CSS vars `:root` + screenshot detail. Nilai v2 berstatus **measured** (dari `getComputedStyle`/stylesheet, sumber terkuat) dan OVERRIDE nilai v1 yang konflik.
+- Catatan: situs dilindungi Vercel Security Checkpoint (lolos setelah 1x tunggu + reload); app memakai inner-scroll container (`overflow-y`), bukan window scroll.
+- Sisa label **inferred** = aproksimasi visual, toleransi ±2px.
 
-> Catatan hak: warna, font, dan pola layout di bawah adalah observasi untuk inspirasi desain. Jangan menyalin logo, ikon, ilustrasi, atau copy milik Chainlink.
+> Catatan hak: yang ditiru = pola layout, skala, dan token generik. Jangan menyalin logo heksagon, ikon network/token, ilustrasi, foto, atau copy milik Chainlink.
 
 ## Reference Screenshot
 ![Full-page screenshot of data.chain.link/feeds](./assets/chainlink-data-feeds.png)
-
-Jadikan screenshot ini sumber kebenaran visual untuk layout, hierarki, densitas, dan rasa. Token di bawah mendeskripsikan halaman yang sama dalam bentuk machine-readable.
+![Viewport screenshot of feed detail page](./assets/chainlink-feed-detail.png)
 
 ## Design Summary
-Light-only, high-contrast, dev-tool presisi: background putih, teks near-black, satu aksen biru (`#0847F7`) yang dipakai hemat (CTA, link, badge), border 1px abu muda di mana-mana, radius kecil untuk kontrol dan pill untuk chips/badge, tabel berupa "card rows" putih ber-border (bukan grid garis), section lega, hampir tanpa shadow kecuali soft-shadow pada resource cards. Tipografi Inter untuk UI + display sans geometris untuk heading. Cocok ditiru untuk aplikasi data/DeFi yang butuh kesan institusional dan keterbacaan angka.
+Light-only (`colorScheme: light`, tanpa dark mode). Background konten **abu sangat muda** (`gray-50 #FAFBFC`), kartu/baris **putih**, teks utama abu tua (`gray-600 #4E5560` — ya, body text BUKAN hitam), satu biru brand (`blue-700 #0847F7`) yang dipakai hemat. Border selalu 1px `gray-200 #E4E8ED`. Radius sistem: **4px kontrol, 8px kartu**. Heading display `TASAOrbiterDisplay`, body `Inter`, kode `Fira Code`. Tabel = baris kartu tersegmentasi (border atas-bawah per sel + radius ujung 4px). Hierarki angka besar untuk harga, label kecil navy semibold untuk metadata.
 
-## Design Tokens
+## Design Tokens (measured dari `:root`, 314 vars)
 
-### Colors
-| Role | Hex | Status |
+### Colors — palet eksak
+```
+gray:   50 #FAFBFC | 100 #F5F7FA | 200 #E4E8ED | 300 #D1D6DE | 400 #9FA7B2
+        500 #6C7585 | 600 #4E5560 | 700 #3C414C | 800 #212732 | 900 #141921 | 950 #0E1119
+blue:   50 #EFF6FF | 100 #DCEBFF | 200 #C1DBFF | 300 #97C1FF | 400 #639CFF
+        500 #2E7BFF | 600 #0D5DFF | 700 #0847F7 (brand) | 800 #0036C9 | 900 #00299A | 950 #001A62
+green:  50 #F1FCF5 | 100 #DDF8E6 | … | 600 #30A059 | 700 #267E46 (badge Tier)
+red:    500 #EF4444 | 600 #DC2626 (error)
+orange: 500 #E86832 … | yellow: 400 #F9C424 … (warning)
+purple: 100 #EDE8FF (wash banner) | 600 #6838E0 …
+```
+
+| Role | Token | Status |
 |---|---|---|
-| Brand / primary action | `#0847F7` | observed |
-| Ink / teks utama | `#141921` | observed |
-| Abu teks | `#4E5560` | observed |
-| Muted / placeholder / ikon sekunder | `#9FA7B2` | observed |
-| Border / garis | `#E5E7EB` | inferred |
-| Lavender wash (banner, toast, chip ikon) | `#EDE8FF` | observed |
-| Lingkaran ikon cards | `#EEF2FF` | inferred |
-| Background halaman / kartu / baris | `#FFFFFF` | observed |
-| Band infografis (wash gradasi) | `#F7F9FC` → `#F4F6FF` | inferred |
-| Strip nav aktif | `#0847F7` (2–3px) | observed |
+| Background konten (`main`) | `gray-50 #FAFBFC` | measured |
+| Kartu / baris / popover | `#FFFFFF` | measured |
+| Teks body (`--color-text-primary`) | `gray-600 #4E5560` | measured |
+| Teks sekunder / heading tabel | `gray-700 #3C414C`–`gray-600` | measured |
+| Ink (H1, angka) | `gray-900 #141921` | measured |
+| Brand / link / primer | `blue-700 #0847F7` | measured |
+| Border kartu/baris (`--color-border-primary`) | `gray-200 #E4E8ED` | measured |
+| Border tombol outline | `blue-400 #639CFF` (2px) | measured |
+| Focus ring (`--border-interactive-focus`) | `4px blue-600 #0D5DFF` | measured |
+| Wash banner / chip ikon | `purple-100 #EDE8FF` / `blue-100 #DCEBFF` | measured |
+| Badge kategori (Crypto) | `blue-100` bg + teks ink | measured (screenshot) |
+| Badge Tier (Low Market Risk) | `green-100` bg + `green-700` teks | measured (screenshot) |
+| Strip nav aktif | `blue-700`, 2–3px | measured (screenshot) |
 
-- `colorScheme: light` only (observed). Tidak ada dark mode.
-- Biru dipakai hemat: CTA, link feed, badge SVR, breadcrumb, panah cards.
+### Typography (measured)
+- Body: `Inter, Arial, "Helvetica Neue", Helvetica, sans-serif` — **16px/400**, warna `gray-600`
+- Heading: `TASAOrbiterDisplay, Arial, ...` via utilitas `font-display`
+- Kode: `Fira Code, Courier New, monospace`
+- Berat sistem: `400 / 500 / 700` (tidak ada 600 — yang terlihat "semibold" = 500/700)
+- Skala terukur: hero H1 `48px/500` centered (`text-6xl leading-10 text-center font-medium`); H1 feeds `40px/500`; H2 produk `36px/600` putih (`text-5xl`); H2 section detail `32px/500`; subtitle detail ("Ethereum") ~40px abu muda (inferred `#9FA7B2`); TH tabel `16px/700 gray-600`; sel `16px/400`; link feed `16px #0847F7`; chip `14px/400`; tombol primer `12px/600`; badge SVR `12px/400`
+- Angka harga/heartbeat: `tabular-nums` (wajib agar rata)
 
-### Typography
-- Body/UI (observed): `Inter, Arial, "Helvetica Neue", Helvetica, sans-serif`
-- Heading (observed dari `fontStacks.heading`): `TASAOrbiterDisplay, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`
-- Skala (observed dari branding): `h1 28px`, `h2 28–36px`, `body 14px`
-- Kecil UI (inferred dari screenshot): header tabel / chips / footer `12–13px`, badge `10–11px` bold uppercase
-- Berat: body 400, label/tombol 500–600, heading ~600 (inferred)
-- Angka (inferred): tabular-nums untuk kolom Answer/Heartbeat agar rata (`$79,370.49`, `00:32:40`)
-- Hierarki: breadcrumb 13px biru → H1 28px ink → subtitle 14–15px abu → konten 13–14px
+### Spacing, Radius, Border, Shadow (measured)
+- Skala spasi: basis **4px** → `4 8 12 16 20 24 32 40 48 64 80 96`
+- Radius sistem: `--border-radius-primary: 4px`, `--border-radius-secondary: 8px`, `--border-radius-round: 50%`. Terukur: tombol primer/kartu produk/pagination **4px**; kartu produk `rounded-lg` **8px**; chips/SVR/first-td **24px** (pill praktis)
+- Border: `--border-width-primary: 1px`, `secondary: 2px`; warna default `gray-200`
+- Shadow: kontrol/baris `none`; kartu elevasi memakai token lapis (`--shadow-mid: 0px 8px 24px -16px #0C162C52` dst.)
+- Ukuran terukur: header `74px` (`min-h-[74px]`, padding `16px 40px`, `fixed`, bg nyaris transparan + blur); `main` bg `gray-50`, `padding-top 48px`; tombol primer `124×40`, padding `12px 24px`; chip `padding 12px 16px`, h43; tombol outline `padding 8px 24px`, h40; baris tabel h56; sel `padding 15px 12px 15px 24px`; TH `padding 8px 12px 8px 24px`; badge SVR `padding 1px 8px`, h18; kartu produk `max-w-[408px]` (408×507)
 
-### Spacing And Layout
-- Base unit `4` (observed) → skala 4/8/12/16/24px
-- Shell (observed + inferred): sidebar ikon sempit putih + border kanan tipis, topbar putih (logo kiri, search + CTA kanan), konten tengah max-width ~1100–1200px (inferred)
-- Sel tabel: padding vertikal ~12–16px (inferred); gap antar-baris kartu kecil
-- Cards resources: padding ~24px, gap grid ~20–24px (inferred)
-- Section rhythm lega ~64–96px antar-band (inferred)
-- Radius (observed dari branding): kontrol `6px`, input `4px`; (inferred dari screenshot): dropdown `6–8px`, baris `8px`, cards `12–16px`, chips/badge/tombol Prev-Next `999px` (pill)
-- Border: selalu `1px solid` abu muda (inferred `#E5E7EB`)
-- Shadow: kontrol/input `none` (observed); baris tabel tanpa shadow; resource cards soft-shadow halus + border (inferred); tidak ada shadow berat
+## Layout Blueprint (per halaman, untuk klon 100%)
 
-## Components
-- **Primary button** (`Request data`): solid `#0847F7`, teks putih 13–14px medium, padding ~8–10px × 16–20px, radius 6px, tanpa shadow. Varian outline (`Next`): border + teks biru, bg putih, pill.
-- **Dropdown filter** (`All Networks 30`): putih, border 1px abu, radius 6–8px, teks kecil + count.
-- **Chips**: putih, border 1px abu, radius pill, ikon network 14–16px kiri, teks 12–13px.
-- **Tabel feeds**: header tanpa background (teks navy 12–13px semibold + ikon sort/info); tiap baris = kartu putih ber-border radius ~8px; kolom: Feed (link biru + ikon token 16–18px) | Network | Answer (ink, tabular) | Deviation | Heartbeat | Asset class. Pagination: `Prev` disabled outline-abu, teks tengah abu 13px, `Next` outline-biru.
-- **Badge `SVR`**: solid biru, teks putih 10–11px bold uppercase, pill, padding ~2–4px × 6–8px.
-- **Resource cards** (2×2): putih, border 1px abu, radius 12–16px, soft-shadow, ikon dalam lingkaran wash-biru, judul 14px semibold, desc 13px abu, panah biru melingkar kanan.
-- **Toast/banner CRE**: bg lavender `#EDE8FF`, radius 8–12px, teks ungu tua, link biru.
-- **Footer**: putih, top-border muda, teks link abu 12–13px multi-kolom.
-- **Ikonografi**: outline tipis ~1.5px, geometris (hegagon), ikon network bulat kecil berwarna.
+### Shell global
+`[icon rail kiri ~88px, putih, border kanan] [kolom: topbar 74px + main gray-50]`. Rail = ikon outline vertikal, item aktif = strip biru kiri + ikon biru. Topbar: brand/teks kiri ("Data" bold), kanan search + tombol primer. (Catatan: homepage tidak me-render `aside` — rail feeds/detail berupa div biasa.)
 
-## Page Patterns
-Urutan section (observed dari markdown): banner CRE → sidebar + topbar → breadcrumb `Data /` → H1 + subtitle → filter dropdown → chips → tabel → pagination (`Showing 1 to 10 of 1819 entries`) → band infografis (H2 tengah + diagram) → `Data Feeds Resources` 2×2 cards → footer link farm (Developers, Products, Use Cases, Community, Resources, Chainlink, Contact, Social).
-- Pola tabel-paginasi-infografis-resources ini bisa dipakai 1:1 untuk halaman daftar index/feed di aplikasi kita.
-- Responsif (inferred): sidebar collapse ke ikon, tabel scroll-x, cards 2→1 kolom.
+### Homepage `/`
+Hero centered: H1 display 48px + subtitle abu + CTA. Di bawah: 3 kartu produk (`max-w-408px`, putih, border, radius 8, `overflow-hidden`): area visual gelap atas (H2 display 36px putih + checklist) + area konten bawah (`flex flex-col justify-end gap-2`) + deretan ikon network. Lalu band wash + footer link farm.
+
+### Feeds `/feeds`
+Breadcrumb biru (`Data /`) → H1 40px + subtitle → 2 dropdown filter (putih, border, radius ~6px) → chips pill (border 1px, radius 24, ikon kiri) → **tabel full-width**: header tanpa bg (teks gray-600 bold) → baris tersegmentasi (sel putih, border-y 1px, radius ujung 4px, h56) → kolom Feed(link biru + ikon token + badge SVR) | Network | Answer (tabular) | Deviation | Heartbeat | Asset class → pagination (Prev disabled / "Showing 1 to 10 of …" / Next outline 2px biru). Lalu band infografis + resource cards 2×2 + footer.
+
+### Detail feed `/feeds/[network]/[pair]`
+Breadcrumb → baris judul: H1 40px + pill `SVR-enabled` (bg biru muda, radius full, ikon + info) … kanan 2 tombol (outline + solid) → subtitle abu besar (nama network) → badge kategori (bg biru muda, radius kecil) → **kartu info 2 kolom** (putih, border, radius 8): kiri ~470px deretan field (label navy semibold kecil + value, separator 1px antar-baris: Answer, Secured by Staking, Network + ikon, Also on [grid ikon], Tier [badge hijau], Trigger parameters [2 kolom: Deviation threshold | Heartbeat], Last update); kanan area chart + legenda + rentang waktu.
+
+## Components (koreksi v2 — semua measured)
+- **Primer** (`Request data`, `Standard feed docs`): `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded`, bg `#0847F7`, putih `12px/600`, padding `12px 24px`, radius **4px**, tanpa shadow
+- **Outline** (`SVR feed docs`, `Next`): bg putih, teks `#0847F7` `14px/500`, **border 2px `#639CFF`**, radius **4px**, padding `8px 24px`
+- **Chip filter**: `filterButton-module…`, putih, border 1px `#E4E8ED`, radius **24px**, `14px/400` ink, padding `12px 16px`, ikon network kiri
+- **Badge SVR**: `ml-2 rounded-3xl bg-blue-700 px-2 py-[1px] text-xs text-white` — putih `12px/400`, radius 24, padding `1px 8px`
+- **Pill SVR-enabled**: bg biru muda + border, radius full, ikon heksagon + info
+- **Search**: teks trigger abu + ikon kaca pembesar (di topbar, tanpa kotak penuh)
+- **Tabel**: `table.table`; TH `16px/700`; TD putih border-y + radius ujung; hover row (`highlight-row on-row-click`)
 
 ## Content Style
-- Voice: profesional, faktual, kalimat pendek. Contoh observed: `Highly secure, reliable and decentralized real-world data published onchain.`, `Battle-tested infrastructure for highly secure and reliable market-representative data.`
-- CTA: `Request data`, `Read the docs`, `Explore use cases`, `Talk to an expert`, `Start building`.
-- Heading deskriptif, bukan playful. Copy padat data (angka, threshold, heartbeat), minim marketing fluff.
+Voice profesional-faktual, kalimat pendek. H1 = nama objek (`Data Feeds`, `ETH / USD`). Label metadata kecil navy (`Answer`, `Network`, `Tier`, `Heartbeat`, `Deviation threshold`). CTA: `Request data`, `SVR feed docs`, `Standard feed docs`, `Read the docs`.
 
 ## Agent Build Instructions
-Target stack repo ini: Next.js 16 + React 19 + Tailwind CSS v4 + TypeScript (cek `package.json`).
+Target: Next.js 16 + React 19 + Tailwind v4 + shadcn (lihat `package.json`, `components.json`).
 
-1. Definisikan token di Tailwind v4 via `@theme` (contoh):
+1. Token Tailwind (nilai measured — pakai persis):
    ```css
    @theme {
      --color-brand: #0847F7;
      --color-ink: #141921;
-     --color-gray-text: #4E5560;
-     --color-muted: #9FA7B2;
-     --color-line: #E5E7EB;
+     --color-body: #4E5560;      /* teks utama! bukan hitam */
+     --color-page: #FAFBFC;      /* bg main */
+     --color-line: #E4E8ED;      /* border */
+     --color-outline-blue: #639CFF;
      --color-wash: #EDE8FF;
-     --color-wash-blue: #EEF2FF;
+     --color-wash-blue: #DCEBFF;
      --font-sans: "Inter", Arial, "Helvetica Neue", sans-serif;
+     --font-display: "TASAOrbiterDisplay", ...; /* ganti font display bebas-lisensi */
+     --font-mono: "Fira Code", ...;
    }
    ```
-   Heading display (pengganti TASAOrbiterDisplay yang proprietari): pakai `Inter` 600 dengan tracking sedikit negatif — jangan klaim sebagai font Chainlink.
-2. Aturan komponen: tombol primer solid brand radius 6px; chips/badge pill; tabel sebagai card-rows (border 1px `line`, radius 8px, gap antar-baris); angka pakai `tabular-nums`; resource cards putih + border + `shadow-sm`.
-3. Jangan menyalin aset Chainlink (logo hegagon, ikon network, infografis, copy). Buat ikon/teks sendiri dengan gaya yang sama.
-4. Nilai bertanda **inferred** boleh disesuaikan ±2px saat implementasi; yang **observed** (hex brand, font stack, skala tipe) dipertahankan.
+   Radius: kontrol `rounded` (4px), kartu `rounded-lg` (8px), pill `rounded-3xl`/full.
+2. Pola wajib: shell rail + topbar-74 + main gray-50; H1 display; tabel card-rows (border-y per sel, `tabular-nums`); tombol primer 12px/600 radius-4; badge SVR persis kelas di atas; focus ring 4px `#0D5DFF`.
+3. Dilarang menyalin aset Chainlink (logo, ikon network/token, ilustrasi, copy). Teks dan ikon dibuat sendiri dengan gaya yang sama.
+4. Copy kita mengikuti pola label di atas, bukan kalimat mereka.
 
 ## Rerun Inputs
-workflow: firecrawl-website-design-clone
-source_url: https://data.chain.link/
-target_stack: Next.js 16 + React 19 + Tailwind CSS v4 + TypeScript
-output: docs/DESIGN-data-chainlink.md
-evidence: Firecrawl branding+markdown+summary (`/` dan `/feeds`), screenshot `./assets/chainlink-data-feeds.png`
-```
-
+workflow: browser-use deep research (tab khusus, computed style + :root vars + screenshot)
+source_urls: https://data.chain.link/ , /feeds , /feeds/ethereum/mainnet/eth-usd
+target_stack: Next.js 16 + React 19 + Tailwind CSS v4 + shadcn + TypeScript
+output: docs/DESIGN-data-chainlink.md (+ ./assets/chainlink-feed-detail.png)
+evidence: 314 CSS vars, getComputedStyle per komponen, 2 screenshot
