@@ -21,7 +21,9 @@ export default function IndexesPage() {
     <>
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-4xl font-medium">Index</h1>
+          <h1 className="font-heading text-5xl font-bold tracking-tight">
+            Index
+          </h1>
           <Badge variant="secondary">Contoh</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">

@@ -81,7 +81,8 @@
   --sidebar-accent-foreground: #2447f9;
   --sidebar-border: #e5e7eb;
   --sidebar-ring: #2447f9;
-  --font-sans: "Poppins", "Inter", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans:
+    "Poppins", "Inter", Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 .dark {
@@ -116,7 +117,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  --font-sans: "Poppins", "Inter", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans:
+    "Poppins", "Inter", Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 @layer base {

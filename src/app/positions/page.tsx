@@ -14,7 +14,9 @@ export default function PositionsPage() {
   return (
     <>
       <div>
-        <h1 className="font-heading text-4xl font-medium">Positions</h1>
+        <h1 className="font-heading text-5xl font-bold tracking-tight">
+          Positions
+        </h1>
         <p className="mt-2 text-muted-foreground">
           Posisi likuiditas NFT milik wallet yang terhubung.
         </p>

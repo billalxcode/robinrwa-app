@@ -44,7 +44,9 @@ export default function DocsPage() {
   return (
     <>
       <div>
-        <h1 className="font-heading text-4xl font-medium">Dokumentasi</h1>
+        <h1 className="font-heading text-5xl font-bold tracking-tight">
+          Dokumentasi
+        </h1>
         <p className="mt-2 text-muted-foreground">
           Spesifikasi kontrak eIndex — sumber kebenaran ada di
           <code className="mx-1 rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em]">

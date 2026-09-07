@@ -27,7 +27,9 @@ export default function OraclePage() {
     <>
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-4xl font-medium">Oracle</h1>
+          <h1 className="font-heading text-5xl font-bold tracking-tight">
+            Oracle
+          </h1>
           <Badge variant="secondary">Contoh</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
