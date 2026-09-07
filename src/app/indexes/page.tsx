@@ -24,19 +24,19 @@ export default function IndexesPage() {
           <h1 className="font-heading text-5xl font-bold tracking-tight">
             Index
           </h1>
-          <Badge variant="secondary">Contoh</Badge>
+          <Badge variant="secondary">Sample</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
-          Daftar index eIndex. Satu deposit dipecah per bobot volume global,
-          posisi NFT langsung ke wallet pengguna.
+          The eIndex list. One deposit is split by global volume weights,
+          position NFTs go straight to the user wallet.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Semua Index</CardTitle>
+          <CardTitle>All Indexes</CardTitle>
           <CardDescription>
-            Data contoh untuk preview UI — bukan data on-chain.
+            Sample data for UI preview — not on-chain data.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,9 +44,9 @@ export default function IndexesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Index</TableHead>
-                <TableHead>Simbol</TableHead>
-                <TableHead>Konstituen</TableHead>
-                <TableHead>Bobot Teratas</TableHead>
+                <TableHead>Symbol</TableHead>
+                <TableHead>Constituents</TableHead>
+                <TableHead>Top Weight</TableHead>
                 <TableHead>Epoch</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -65,7 +65,9 @@ export default function IndexesPage() {
                   <TableCell className="tabular-nums">{idx.epoch}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={idx.status === "Aktif" ? "default" : "secondary"}
+                      variant={
+                        idx.status === "Active" ? "default" : "secondary"
+                      }
                     >
                       {idx.status}
                     </Badge>

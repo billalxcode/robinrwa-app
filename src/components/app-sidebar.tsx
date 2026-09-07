@@ -39,9 +39,9 @@ const mainNav: NavItem[] = [
   { title: "Positions", url: "/positions", icon: Wallet },
 ];
 
-// Grup Resources: halaman penunjang (dokumentasi kontrak + status oracle).
+// Resources group: supporting pages (contract docs + oracle status).
 const resourceNav: NavItem[] = [
-  { title: "Dokumentasi", url: "/docs", icon: BookOpenText },
+  { title: "Documentation", url: "/docs", icon: BookOpenText },
   { title: "Oracle", url: "/oracle", icon: Activity },
 ];
 

@@ -20,10 +20,10 @@ import {
 import { mockIndexes } from "@/lib/mock";
 
 const stats = [
-  { label: "Total Index", value: "3", note: "2 aktif · 1 nonaktif" },
-  { label: "Posisi Saya", value: "0", note: "Hubungkan wallet untuk mulai" },
-  { label: "Epoch Oracle", value: "1", note: "Bobot diperbarui 1×/24 jam" },
-  { label: "Jaringan", value: "4663", note: "Robinhood Chain" },
+  { label: "Total Indexes", value: "3", note: "2 active · 1 inactive" },
+  { label: "My Positions", value: "0", note: "Connect a wallet to start" },
+  { label: "Oracle Epoch", value: "1", note: "Weights updated once / 24h" },
+  { label: "Network", value: "4663", note: "Robinhood Chain" },
 ];
 
 export default function Home() {
@@ -33,16 +33,16 @@ export default function Home() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-heading text-5xl font-bold tracking-tight">
-              Ringkasan
+              Overview
             </h1>
-            <Badge variant="secondary">Contoh</Badge>
+            <Badge variant="secondary">Sample</Badge>
           </div>
           <p className="mt-2 text-muted-foreground">
-            Satu deposit, posisi likuiditas terdiversifikasi per bobot volume.
+            One deposit, diversified liquidity positions by volume weight.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/indexes" />}>
-          Jelajahi Index
+          Explore Indexes
           <ArrowRight data-icon="inline-end" />
         </Button>
       </div>
@@ -63,9 +63,9 @@ export default function Home() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Index Terdaftar</CardTitle>
+          <CardTitle>Registered Indexes</CardTitle>
           <CardDescription>
-            Pratinjau — data contoh, bukan data on-chain.
+            Preview — sample data, not on-chain data.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,8 +73,8 @@ export default function Home() {
             <TableHeader>
               <TableRow>
                 <TableHead>Index</TableHead>
-                <TableHead>Konstituen</TableHead>
-                <TableHead>Bobot Teratas</TableHead>
+                <TableHead>Constituents</TableHead>
+                <TableHead>Top Weight</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -90,7 +90,9 @@ export default function Home() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={idx.status === "Aktif" ? "default" : "secondary"}
+                      variant={
+                        idx.status === "Active" ? "default" : "secondary"
+                      }
                     >
                       {idx.status}
                     </Badge>

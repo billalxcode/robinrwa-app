@@ -18,7 +18,7 @@ export default function PositionsPage() {
           Positions
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Posisi likuiditas NFT milik wallet yang terhubung.
+          LP NFT positions owned by the connected wallet.
         </p>
       </div>
 
@@ -27,15 +27,15 @@ export default function PositionsPage() {
           <EmptyMedia variant="icon">
             <Wallet />
           </EmptyMedia>
-          <EmptyTitle>Belum ada posisi</EmptyTitle>
+          <EmptyTitle>No positions yet</EmptyTitle>
           <EmptyDescription>
-            Wallet belum terhubung atau belum ada deposit. Jelajahi index lalu
-            lakukan deposit sekali untuk membuka posisi per leg.
+            No wallet connected or no deposits yet. Explore the indexes, then
+            make a single deposit to open one position per leg.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button nativeButton={false} render={<Link href="/indexes" />}>
-            Jelajahi Index
+            Explore Indexes
             <ArrowRight data-icon="inline-end" />
           </Button>
         </EmptyContent>

@@ -8,12 +8,12 @@ import {
 
 const groups = [
   {
-    title: "Arsitektur & Ikhtisar",
+    title: "Architecture & Overview",
     files: ["00-ikhtisar.md", "01-arsitektur.md"],
-    desc: "Cara kerja router, aliran dana, peran antar kontrak dan oracle.",
+    desc: "How the router works, fund flows, and roles across contracts and the oracle.",
   },
   {
-    title: "Kontrak Inti",
+    title: "Core Contracts",
     files: [
       "02-asset-registry.md",
       "03-weight-registry.md",
@@ -21,22 +21,22 @@ const groups = [
       "05-index-router.md",
       "06-adapter-mock-proxy.md",
     ],
-    desc: "Spesifikasi registry, factory, router add/remove, dan adapter.",
+    desc: "Registry, factory, add/remove router, and adapter specifications.",
   },
   {
-    title: "Oracle Bobot",
+    title: "Weight Oracle",
     files: ["07-oracle-bobot.md", "12-oracle-golang.md"],
-    desc: "Algoritma bobot volume 24 jam dan service Go pemegang UPDATER_ROLE.",
+    desc: "24-hour volume-weight algorithm and the Go service holding UPDATER_ROLE.",
   },
   {
-    title: "Operasi",
+    title: "Operations",
     files: [
       "08-pengujian.md",
       "09-deployment.md",
       "10-operasi-upgrade.md",
       "11-simulasi-frontend.md",
     ],
-    desc: "Testing, deployment UUPS, runbook upgrade, dan skrip simulasi.",
+    desc: "Testing, UUPS deployment, upgrade runbook, and simulation scripts.",
   },
 ];
 
@@ -45,14 +45,14 @@ export default function DocsPage() {
     <>
       <div>
         <h1 className="font-heading text-5xl font-bold tracking-tight">
-          Dokumentasi
+          Documentation
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Spesifikasi kontrak eIndex — sumber kebenaran ada di
+          eIndex contract specifications — the source of truth lives in
           <code className="mx-1 rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em]">
             docs/contracts/final/
           </code>
-          repo ini.
+          of this repo.
         </p>
       </div>
 

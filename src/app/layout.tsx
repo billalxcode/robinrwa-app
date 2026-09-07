@@ -21,13 +21,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "RobinRWA · Dashboard eIndex",
-  description: "Dashboard index RWA: jelajahi index, kelola posisi LP.",
+  description: "RWA index dashboard: explore indexes, manage LP positions.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="id"
+      lang="en"
       className={`${poppinsSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">

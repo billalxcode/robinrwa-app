@@ -80,7 +80,7 @@ Aturan:
 - Bold (`font-bold`) BOLEH hanya untuk H1/H2 dan angka hero. Body bold
   DILARANG (pakai `font-medium`/`semibold`).
 - `tracking-tight` WAJIB untuk H1, DILARANG untuk body.
-- Bahasa UI: Bahasa Indonesia (mengikuti R-005 AGENTS.md).
+- Bahasa UI: English (keputusan pemilik, menggantikan default Indonesia).
 
 ## 4. Spacing (jarak)
 

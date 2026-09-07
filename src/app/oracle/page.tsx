@@ -17,9 +17,17 @@ import {
 import { mockWeights } from "@/lib/mock";
 
 const stats = [
-  { label: "Epoch Berjalan", value: "1", note: "Contoh — epoch = versi bobot" },
-  { label: "Jadwal Push", value: "00:00", note: "UTC, tiap 24 jam + retry" },
-  { label: "Batas Basi", value: "26 jam", note: "Distribute revert bila basi" },
+  {
+    label: "Current Epoch",
+    value: "1",
+    note: "Sample — epoch = weight version",
+  },
+  { label: "Push Schedule", value: "00:00", note: "UTC, every 24h + retries" },
+  {
+    label: "Staleness Limit",
+    value: "26 hours",
+    note: "Distribute reverts when stale",
+  },
 ];
 
 export default function OraclePage() {
@@ -30,10 +38,10 @@ export default function OraclePage() {
           <h1 className="font-heading text-5xl font-bold tracking-tight">
             Oracle
           </h1>
-          <Badge variant="secondary">Contoh</Badge>
+          <Badge variant="secondary">Sample</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
-          Status oracle bobot volume — service Go pemegang UPDATER_ROLE.
+          Volume-weight oracle status — the Go service holding UPDATER_ROLE.
         </p>
       </div>
 
@@ -53,9 +61,9 @@ export default function OraclePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Bobot Global Terakhir</CardTitle>
+          <CardTitle>Latest Global Weights</CardTitle>
           <CardDescription>
-            Contoh dari SPEC — total selalu 10.000 bps.
+            Sample from the SPEC — total is always 10,000 bps.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,8 +71,8 @@ export default function OraclePage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Token</TableHead>
-                <TableHead>Bobot (bps)</TableHead>
-                <TableHead>Porsi</TableHead>
+                <TableHead>Weight (bps)</TableHead>
+                <TableHead>Share</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -74,7 +82,7 @@ export default function OraclePage() {
                     {w.token}
                   </TableCell>
                   <TableCell className="tabular-nums">
-                    {w.weightBps.toLocaleString("id-ID")}
+                    {w.weightBps.toLocaleString("en-US")}
                   </TableCell>
                   <TableCell className="tabular-nums">{w.share}</TableCell>
                 </TableRow>

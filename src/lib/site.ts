@@ -2,7 +2,7 @@ export const pathLabels: Record<string, string> = {
   "/": "Home",
   "/indexes": "Index",
   "/positions": "Positions",
-  "/docs": "Dokumentasi",
+  "/docs": "Documentation",
   "/oracle": "Oracle",
 };
 
