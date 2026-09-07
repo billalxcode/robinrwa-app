@@ -27,17 +27,14 @@ export default function IndexesPage() {
           <Badge variant="secondary">Sample</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
-          The eIndex list. One deposit is split by global volume weights,
-          position NFTs go straight to the user wallet.
+          One deposit per index, split by global volume weight.
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>All Indexes</CardTitle>
-          <CardDescription>
-            Sample data for UI preview — not on-chain data.
-          </CardDescription>
+          <CardDescription>Sample data.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -58,7 +55,15 @@ export default function IndexesPage() {
                     {idx.name}
                   </TableCell>
                   <TableCell>{idx.symbol}</TableCell>
-                  <TableCell>{idx.constituents.join(" · ")}</TableCell>
+                  <TableCell>
+                    <span className="flex flex-wrap gap-1.5">
+                      {idx.constituents.map((c) => (
+                        <Badge key={c} variant="outline">
+                          {c}
+                        </Badge>
+                      ))}
+                    </span>
+                  </TableCell>
                   <TableCell className="tabular-nums">
                     {idx.topWeight}
                   </TableCell>

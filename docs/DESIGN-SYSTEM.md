@@ -76,7 +76,12 @@ swap`), fallback Inter → Arial. Kode/mono: Geist Mono. Kelas heading:
 | Angka tabel/harga | `tabular-nums` WAJIB | Kolom angka, epoch, bps, harga |
 
 Aturan:
-- H1 WAJIB diikuti 1 baris deskripsi `text-muted-foreground`.
+- H1 WAJIB diikuti 1 baris deskripsi `text-muted-foreground`: maksimal 15
+  kata, menjelaskan fungsi halaman, tanpa klaim berlebih. Contoh yang
+  DILARANG: kalimat pasif bertele-tele ("Preview — sample data, not on-chain
+  data."). Contoh yang BOLEH: "One deposit split by volume weight."
+- Daftar token/simbol DILARANG memakai pemisah teks (`·`, `,`, `/`).
+  WAJIB badge `outline` tersusun `flex flex-wrap gap-1.5`.
 - Bold (`font-bold`) BOLEH hanya untuk H1/H2 dan angka hero. Body bold
   DILARANG (pakai `font-medium`/`semibold`).
 - `tracking-tight` WAJIB untuk H1, DILARANG untuk body.
@@ -230,7 +235,7 @@ Setiap rute mengikuti urutan:
 5. Footer global sudah di layout — halaman DILARANG menambah footer sendiri.
 
 Aturan data contoh: setiap angka/tabel mock WAJIB dilabeli Badge
-"Contoh" di header halaman + Description "bukan data on-chain" di kartu.
+"Sample" + deskripsi kartu maksimal 2 kata ("Sample data.").
 Data mock hidup di `src/lib/mock.ts`, BUKAN tersebar di halaman.
 
 ## 9. Checklist sebelum selesai (UI task)

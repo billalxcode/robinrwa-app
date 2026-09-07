@@ -22,7 +22,7 @@ import { mockIndexes } from "@/lib/mock";
 const stats = [
   { label: "Total Indexes", value: "3", note: "2 active · 1 inactive" },
   { label: "My Positions", value: "0", note: "Connect a wallet to start" },
-  { label: "Oracle Epoch", value: "1", note: "Weights updated once / 24h" },
+  { label: "Oracle Epoch", value: "1", note: "Updated every 24h" },
   { label: "Network", value: "4663", note: "Robinhood Chain" },
 ];
 
@@ -38,7 +38,7 @@ export default function Home() {
             <Badge variant="secondary">Sample</Badge>
           </div>
           <p className="mt-2 text-muted-foreground">
-            One deposit, diversified liquidity positions by volume weight.
+            One deposit split by volume weight into LP positions.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/indexes" />}>
@@ -64,9 +64,7 @@ export default function Home() {
       <Card>
         <CardHeader>
           <CardTitle>Registered Indexes</CardTitle>
-          <CardDescription>
-            Preview — sample data, not on-chain data.
-          </CardDescription>
+          <CardDescription>Sample data.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -84,7 +82,15 @@ export default function Home() {
                   <TableCell className="font-medium text-primary">
                     {idx.name}
                   </TableCell>
-                  <TableCell>{idx.constituents.join(" · ")}</TableCell>
+                  <TableCell>
+                    <span className="flex flex-wrap gap-1.5">
+                      {idx.constituents.map((c) => (
+                        <Badge key={c} variant="outline">
+                          {c}
+                        </Badge>
+                      ))}
+                    </span>
+                  </TableCell>
                   <TableCell className="tabular-nums">
                     {idx.topWeight}
                   </TableCell>

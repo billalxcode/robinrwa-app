@@ -20,13 +20,13 @@ const stats = [
   {
     label: "Current Epoch",
     value: "1",
-    note: "Sample — epoch = weight version",
+    note: "Sample data",
   },
-  { label: "Push Schedule", value: "00:00", note: "UTC, every 24h + retries" },
+  { label: "Push Schedule", value: "00:00", note: "UTC daily + retries" },
   {
     label: "Staleness Limit",
     value: "26 hours",
-    note: "Distribute reverts when stale",
+    note: "Stale quotes revert distribute",
   },
 ];
 
@@ -41,7 +41,7 @@ export default function OraclePage() {
           <Badge variant="secondary">Sample</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
-          Volume-weight oracle status — the Go service holding UPDATER_ROLE.
+          Weight oracle status and latest push.
         </p>
       </div>
 
@@ -62,9 +62,7 @@ export default function OraclePage() {
       <Card>
         <CardHeader>
           <CardTitle>Latest Global Weights</CardTitle>
-          <CardDescription>
-            Sample from the SPEC — total is always 10,000 bps.
-          </CardDescription>
+          <CardDescription>SPEC sample. Total: 10,000 bps.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

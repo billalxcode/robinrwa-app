@@ -17,9 +17,7 @@ export default function PositionsPage() {
         <h1 className="font-heading text-5xl font-bold tracking-tight">
           Positions
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          LP NFT positions owned by the connected wallet.
-        </p>
+        <p className="mt-2 text-muted-foreground">Your LP NFT positions.</p>
       </div>
 
       <Empty>
@@ -29,8 +27,7 @@ export default function PositionsPage() {
           </EmptyMedia>
           <EmptyTitle>No positions yet</EmptyTitle>
           <EmptyDescription>
-            No wallet connected or no deposits yet. Explore the indexes, then
-            make a single deposit to open one position per leg.
+            Connect a wallet and deposit once to open positions.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
