@@ -85,7 +85,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/" />}>
-              <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <Layers />
               </span>
               <span className="flex flex-col gap-0.5 leading-none">

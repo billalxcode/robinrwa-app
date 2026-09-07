@@ -20,7 +20,7 @@ export function AppNavbar() {
   const pathname = usePathname();
   const trail = breadcrumbTrail(pathname);
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background px-4">
+    <header className="sticky top-0 z-10 flex h-[74px] shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-white/80 px-10 backdrop-blur-md">
       <div className="flex items-center gap-2">
         <SidebarTrigger />
         <Separator orientation="vertical" className="mr-2 h-4" />

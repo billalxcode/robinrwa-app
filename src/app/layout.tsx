@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { AppFooter } from "@/components/app-footer";
 import { AppNavbar } from "@/components/app-navbar";
@@ -7,10 +7,10 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const interSans = Inter({
+const poppinsSans = Poppins({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      className={`${interSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${poppinsSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <TooltipProvider>
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AppSidebar />
             <SidebarInset className="flex min-h-svh flex-col">
               <AppNavbar />
-              <main className="flex flex-1 flex-col gap-8 bg-muted/50 p-8">
+              <main className="flex flex-1 flex-col gap-10 p-6 md:p-10">
                 {children}
               </main>
               <AppFooter />
