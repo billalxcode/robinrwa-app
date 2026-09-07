@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -52,7 +53,12 @@ export default function IndexesPage() {
               {mockIndexes.map((idx) => (
                 <TableRow key={idx.id}>
                   <TableCell className="font-medium text-primary">
-                    {idx.name}
+                    <Link
+                      href={`/indexes/${idx.id}`}
+                      className="hover:underline"
+                    >
+                      {idx.name}
+                    </Link>
                   </TableCell>
                   <TableCell>{idx.symbol}</TableCell>
                   <TableCell>

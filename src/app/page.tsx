@@ -80,7 +80,12 @@ export default function Home() {
               {mockIndexes.map((idx) => (
                 <TableRow key={idx.id}>
                   <TableCell className="font-medium text-primary">
-                    {idx.name}
+                    <Link
+                      href={`/indexes/${idx.id}`}
+                      className="hover:underline"
+                    >
+                      {idx.name}
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <span className="flex flex-wrap gap-1.5">
