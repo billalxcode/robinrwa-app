@@ -56,12 +56,8 @@ export default async function IndexDetailPage({
           </div>
           <p className="mt-2 text-muted-foreground">{index.description}</p>
         </div>
-        <Button
-          variant="secondary"
-          nativeButton={false}
-          render={<Link href="/docs" />}
-        >
-          View Contracts
+        <Button nativeButton={false} render={<Link href="/positions" />}>
+          Provide Liquidity
           <ArrowRight data-icon="inline-end" />
         </Button>
       </div>
