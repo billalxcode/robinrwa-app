@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { MockIndex } from "@/lib/mock";
+import type { MockTokenWeight } from "@/lib/mock";
 
 const FEE_BPS = 20;
 const BPS_DENOM = 10_000;
@@ -34,7 +34,13 @@ function fmt(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 6 });
 }
 
-export function ProvideLiquidityModal({ index }: { index: MockIndex }) {
+export function ProvideLiquidityModal({
+  name,
+  tokens,
+}: {
+  name: string;
+  tokens: MockTokenWeight[];
+}) {
   const [token, setToken] = useState<"ETH" | "USDG">("USDG");
   const [amount, setAmount] = useState("");
   const [skipped, setSkipped] = useState<string[]>([]);
@@ -53,7 +59,7 @@ export function ProvideLiquidityModal({ index }: { index: MockIndex }) {
       };
     const computedFee = (amt * FEE_BPS) / BPS_DENOM;
     const computedNet = amt - computedFee;
-    const active = index.tokens.filter((t) => !skipped.includes(t.token));
+    const active = tokens.filter((t) => !skipped.includes(t.token));
     const total = active.reduce((s, t) => s + t.weightBps, 0);
     if (total === 0)
       return {
@@ -73,7 +79,7 @@ export function ProvideLiquidityModal({ index }: { index: MockIndex }) {
     // Remainder to the largest leg, like _resolveWeights.
     if (computed.length > 0) computed[top].inflow += computedNet - distributed;
     return { fee: computedFee, net: computedNet, rows: computed };
-  }, [amt, valid, quoteEligible, skipped, index.tokens]);
+  }, [amt, valid, quoteEligible, skipped, tokens]);
 
   function toggleSkip(symbol: string, include: boolean) {
     setSubmitted(false);
@@ -94,7 +100,7 @@ export function ProvideLiquidityModal({ index }: { index: MockIndex }) {
       </DialogTrigger>
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Provide Liquidity — {index.name}</DialogTitle>
+          <DialogTitle>Provide Liquidity — {name}</DialogTitle>
           <DialogDescription>
             Preview only. Submitting calls
             {` IndexRouter.addLiquidity${token} on-chain.`}
@@ -146,8 +152,8 @@ export function ProvideLiquidityModal({ index }: { index: MockIndex }) {
             <Alert>
               <AlertTitle>No eligible legs for ETH</AlertTitle>
               <AlertDescription>
-                Legs on {index.name} are quoted in {LEG_QUOTE}. An ETH deposit
-                fills nothing and reverts (`NoEligibleLegs`).
+                Legs on {name} are quoted in {LEG_QUOTE}. An ETH deposit fills
+                nothing and reverts (`NoEligibleLegs`).
               </AlertDescription>
             </Alert>
           )}

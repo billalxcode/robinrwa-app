@@ -15,9 +15,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockIndexes } from "@/lib/mock";
+import { buildLiveRows, buildMockRows } from "@/lib/index-rows";
+import { getIndexesLive, getOracleStatus } from "@/lib/subgraph";
 
-export default function IndexesPage() {
+export default async function IndexesPage() {
+  const [list, oracle] = await Promise.all([
+    getIndexesLive(),
+    getOracleStatus(),
+  ]);
+  const live = list !== null && oracle !== null;
+  const weights = new Map(
+    (oracle?.tokens ?? []).map((t) => [t.id.toLowerCase(), t.weightBps]),
+  );
+  const rows = live
+    ? buildLiveRows(list.indexes, weights, oracle.stats.epoch)
+    : buildMockRows();
+
   return (
     <>
       <div>
@@ -25,7 +38,9 @@ export default function IndexesPage() {
           <h1 className="font-heading text-5xl font-bold tracking-tight">
             Index
           </h1>
-          <Badge variant="secondary">Sample</Badge>
+          <Badge variant={live ? "default" : "secondary"}>
+            {live ? "Live" : "Sample"}
+          </Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
           One deposit per index, split by global volume weight.
@@ -35,14 +50,15 @@ export default function IndexesPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Indexes</CardTitle>
-          <CardDescription>Sample data.</CardDescription>
+          <CardDescription>
+            {live ? "On-chain." : "Sample data."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Index</TableHead>
-                <TableHead>Symbol</TableHead>
                 <TableHead>Constituents</TableHead>
                 <TableHead>Top Weight</TableHead>
                 <TableHead>Epoch</TableHead>
@@ -50,20 +66,19 @@ export default function IndexesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockIndexes.map((idx) => (
-                <TableRow key={idx.id}>
+              {rows.map((row) => (
+                <TableRow key={row.id}>
                   <TableCell className="font-medium text-primary">
                     <Link
-                      href={`/indexes/${idx.id}`}
+                      href={`/indexes/${row.id}`}
                       className="hover:underline"
                     >
-                      {idx.name}
+                      {row.name}
                     </Link>
                   </TableCell>
-                  <TableCell>{idx.symbol}</TableCell>
                   <TableCell>
                     <span className="flex flex-wrap gap-1.5">
-                      {idx.constituents.map((c) => (
+                      {row.tickers.map((c) => (
                         <Badge key={c} variant="outline">
                           {c}
                         </Badge>
@@ -71,16 +86,16 @@ export default function IndexesPage() {
                     </span>
                   </TableCell>
                   <TableCell className="tabular-nums">
-                    {idx.topWeight}
+                    {row.topWeight}
                   </TableCell>
-                  <TableCell className="tabular-nums">{idx.epoch}</TableCell>
+                  <TableCell className="tabular-nums">{row.epoch}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        idx.status === "Active" ? "default" : "secondary"
+                        row.status === "Active" ? "default" : "secondary"
                       }
                     >
-                      {idx.status}
+                      {row.status}
                     </Badge>
                   </TableCell>
                 </TableRow>

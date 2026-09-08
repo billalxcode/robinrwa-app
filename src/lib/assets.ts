@@ -55,6 +55,15 @@ const KNOWN_ASSETS: AssetMetadata[] = [
     logo: robinscanLogo("NVDA"),
     decimals: 18,
   },
+  {
+    // Quote token for all index legs. Address documented in
+    // docs/LAPORAN-LIKUIDITAS.md (WETH 0x0Bd7…, USDG 0x5fc5…).
+    address: "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+    name: "USDG",
+    ticker: "USDG",
+    logo: PLACEHOLDER_LOGO,
+    decimals: null,
+  },
 ];
 
 const byAddress = new Map(KNOWN_ASSETS.map((a) => [a.address, a]));
