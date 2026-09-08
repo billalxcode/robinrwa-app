@@ -113,6 +113,7 @@ export interface SubgraphLeg {
   quote: string;
   fee: number;
   tickSpacing: number;
+  hooks: string;
 }
 
 export interface SubgraphDeposit {
@@ -193,6 +194,7 @@ const IndexDetailQuery = gql`
       quote
       fee
       tickSpacing
+      hooks
     }
     liquidityAddeds(
       first: 100

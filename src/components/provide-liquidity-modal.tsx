@@ -46,17 +46,23 @@ export interface ModalLeg {
   quote: string;
   fee: number;
   tickSpacing: number;
+  hooks: string;
   logo: string;
+  tokenAddress: string;
+  quoteAddress: string;
 }
 
 export function ProvideLiquidityModal({
   name,
   tokens,
   legs,
+  indexId,
 }: {
   name: string;
   tokens: MockTokenWeight[];
   legs?: ModalLeg[];
+  /** On-chain index id. Null = demo index, steps modal stays read-only. */
+  indexId?: string | null;
 }) {
   const [token, setToken] = useState<"ETH" | "USDG">("USDG");
   const [amount, setAmount] = useState("");
@@ -317,10 +323,21 @@ export function ProvideLiquidityModal({
           setShowSteps(false);
           setOpen(true);
         }}
+        indexId={indexId ?? null}
         indexName={name}
         token={token}
         amount={valid ? fmt(amt) : amount}
-        checking={balanceLoading}
+        legs={(legs ?? []).map((l) => ({
+          tokenAddress: l.tokenAddress,
+          quoteAddress: l.quoteAddress,
+          fee: l.fee,
+          tickSpacing: l.tickSpacing,
+          hooks: l.hooks,
+        }))}
+        skippedAddresses={(legs ?? [])
+          .filter((l) => skipped.includes(l.token))
+          .map((l) => l.tokenAddress)}
+        decimals={token === "ETH" ? 18 : (usdgDecimals.data ?? 18)}
       />
     </Dialog>
   );

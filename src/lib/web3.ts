@@ -1,5 +1,6 @@
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { defineChain } from "@reown/appkit/networks";
+import { createPublicClient, http } from "viem";
 
 // Public identifiers as constants; private/endpoint values come from .env.
 export const REOWN_PROJECT_ID =
@@ -40,6 +41,14 @@ export const robinhood = defineChain({
 });
 
 export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [robinhood];
+
+// Read-only client for quoter/config reads (no key needed).
+export function getPublicClient() {
+  return createPublicClient({
+    chain: robinhood,
+    transport: http(ROBINHOOD_RPC_URL),
+  });
+}
 
 export const web3Metadata = {
   name: "RobinRWA",

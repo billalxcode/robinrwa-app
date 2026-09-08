@@ -130,6 +130,7 @@ function LiveBody({
         </div>
         <ProvideLiquidityModal
           name={index.name}
+          indexId={index.id}
           tokens={legRows.map((l) => ({
             token: l.ticker,
             weightBps: l.weightBps,
@@ -140,7 +141,10 @@ function LiveBody({
             quote: l.quoteTicker,
             fee: l.fee,
             tickSpacing: l.tickSpacing,
+            hooks: l.hooks,
             logo: l.logo,
+            tokenAddress: l.token,
+            quoteAddress: l.quote,
           }))}
         />
       </div>
