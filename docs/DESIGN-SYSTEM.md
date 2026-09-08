@@ -86,9 +86,29 @@ Aturan:
   dipecah: badge terpisah, baris terpisah, atau koma natural
   ("In USDG pool, 0.30% fee, 33.3% share"). Judul metadata HTML dikecualikan.
 - Baris estimasi deposit WAJIB format: logo + ticker + nominal
-  (`tabular-nums`), baris kedua muted: `→ QUOTE · fee% · share%`.
+  (`tabular-nums`), baris kedua muted: kalimat koma natural
+  ("In USDG pool, 0.30% fee, 33.3% share").
 - Saldo tampil di bawah input jumlah + tombol teks `Max`; saldo kurang
   WAJIB menonaktifkan submit + hint merah 1 baris.
+
+### 3.1 Microcopy (aturan kata; sumber: NN/g 3 C's + Material UX writing)
+
+- **Jelas dulu, ringkas kedua.** Setiap teks WAJIB menjawab: apa yang terjadi
+  / apa yang harus dilakukan user. Jargon kontrak (`approve(router)`,
+  `transferFrom`, `NoEligibleLegs`, nama fungsi) DILARANG di UI — pindahkan
+  ke docs/komentar kode (progressive disclosure).
+- **Judul = tujuan, bukan gabungan fakta.** Em-dash (`—`) untuk menempel
+  konteks ke judul DILARANG ("Provide Liquidity — MOON300"). Konteks milik
+  deskripsi 1 baris ("See how your deposit into MOON300 is split.").
+- **Tujuan dulu, baru aksi** ("See how your deposit ... is split",
+  bukan "Preview only. Submitting calls ...").
+- **Akibat, bukan mekanisme** ("Skipped legs are refunded automatically",
+  bukan "map to `skipTokens[]`"; "This index only accepts USDG",
+  bukan "quote mismatch, reverts ...").
+- **Kata umum, present tense, tanpa huruf kapital judul** di label
+  ("Pay with", "Amount", "Fee", "You invest"). Istilah teknis
+  (`nativeButton`, `tokenIds`, `bps` di label user) DILARANG — `bps`
+  BOLEH hanya di tabel data mentah (kolom "Weight (bps)").
 - Bold (`font-bold`) BOLEH hanya untuk H1/H2 dan angka hero. Body bold
   DILARANG (pakai `font-medium`/`semibold`).
 - `tracking-tight` WAJIB untuk H1, DILARANG untuk body.
