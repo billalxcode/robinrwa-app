@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
+import { ConnectButton } from "@/components/connect-button";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -46,7 +47,10 @@ export function AppNavbar() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <Badge variant="outline">Robinhood Chain</Badge>
+      <div className="flex items-center gap-3">
+        <Badge variant="outline">Robinhood Chain</Badge>
+        <ConnectButton />
+      </div>
     </header>
   );
 }
