@@ -1,8 +1,6 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProvideLiquidityModal } from "@/components/provide-liquidity-modal";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -56,10 +54,7 @@ export default async function IndexDetailPage({
           </div>
           <p className="mt-2 text-muted-foreground">{index.description}</p>
         </div>
-        <Button nativeButton={false} render={<Link href="/positions" />}>
-          Provide Liquidity
-          <ArrowRight data-icon="inline-end" />
-        </Button>
+        <ProvideLiquidityModal index={index} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
