@@ -152,16 +152,15 @@ export function ProvideLiquidityModal({
       </DialogTrigger>
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Provide Liquidity — {name}</DialogTitle>
+          <DialogTitle>Provide liquidity</DialogTitle>
           <DialogDescription>
-            Preview only. Submitting calls
-            {` IndexRouter.addLiquidity${token} on-chain.`}
+            See how your deposit into {name} is split.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
           <Field>
-            <FieldLabel>Deposit token</FieldLabel>
+            <FieldLabel>Pay with</FieldLabel>
             <ToggleGroup
               multiple={false}
               value={[token]}
@@ -179,7 +178,7 @@ export function ProvideLiquidityModal({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="pl-amount">Amount to deposit</FieldLabel>
+            <FieldLabel htmlFor="pl-amount">Amount</FieldLabel>
             <Input
               id="pl-amount"
               type="number"
@@ -224,16 +223,13 @@ export function ProvideLiquidityModal({
 
           {token === "USDG" ? (
             <p className="text-xs text-muted-foreground">
-              USDG needs <code className="font-mono">approve(router)</code>{" "}
-              before depositing (the contract pulls via{" "}
-              <code className="font-mono">transferFrom</code>).
+              You approve USDG spending first, then deposit.
             </p>
           ) : (
             <Alert>
-              <AlertTitle>No eligible legs for ETH</AlertTitle>
+              <AlertTitle>ETH won&apos;t work here</AlertTitle>
               <AlertDescription>
-                Legs on {name} are quoted in {LEG_QUOTE}. An ETH deposit fills
-                nothing and reverts (`NoEligibleLegs`).
+                This index only accepts USDG.
               </AlertDescription>
             </Alert>
           )}
@@ -241,13 +237,13 @@ export function ProvideLiquidityModal({
           {valid && quoteEligible && (
             <div className="flex flex-col gap-3 rounded-xl border border-border p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Fee (20 bps)</span>
+                <span className="text-muted-foreground">Fee</span>
                 <span className="tabular-nums">
                   {fmt(fee)} {token}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Net into legs</span>
+                <span className="text-muted-foreground">You invest</span>
                 <span className="font-medium tabular-nums">
                   {fmt(net)} {token}
                 </span>
@@ -296,11 +292,7 @@ export function ProvideLiquidityModal({
                 );
               })}
               <p className="text-xs text-muted-foreground">
-                Skipped legs map to{" "}
-                <code className="font-mono">skipTokens[]</code>. Dust and failed
-                legs are refunded; <code className="font-mono">tokenIds</code>{" "}
-                come from the <code className="font-mono">LiquidityAdded</code>{" "}
-                event.
+                Skipped legs are refunded automatically.
               </p>
               {insufficient && (
                 <p className="text-xs font-medium text-destructive">
@@ -313,12 +305,12 @@ export function ProvideLiquidityModal({
           {submitted && (
             <Alert>
               <AlertTitle>
-                {address ? "On-chain submit not wired" : "Wallet not connected"}
+                {address ? "Deposits aren't live yet" : "Connect your wallet"}
               </AlertTitle>
               <AlertDescription>
                 {address
-                  ? "Preview only — no transaction was sent. On-chain deposit via IndexRouter lands in the next phase."
-                  : `Preview only — no transaction was sent. Connect a wallet, fund it with ${token}, then submit again.`}
+                  ? "You're previewing only."
+                  : "Nothing has been sent yet."}
               </AlertDescription>
             </Alert>
           )}
