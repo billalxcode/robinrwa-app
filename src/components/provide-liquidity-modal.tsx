@@ -228,9 +228,7 @@ export function ProvideLiquidityModal({
           ) : (
             <Alert>
               <AlertTitle>ETH won&apos;t work here</AlertTitle>
-              <AlertDescription>
-                This index only accepts USDG.
-              </AlertDescription>
+              <AlertDescription>This index only accepts USDG.</AlertDescription>
             </Alert>
           )}
 
