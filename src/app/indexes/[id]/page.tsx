@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProvideLiquidityModal } from "@/components/provide-liquidity-modal";
+import { RecentTransactions } from "@/components/recent-transactions";
 import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -290,6 +291,8 @@ function LiveBody({
           </Table>
         </CardContent>
       </Card>
+
+      <RecentTransactions indexId={index.id} />
     </>
   );
 }
