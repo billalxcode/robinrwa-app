@@ -15,22 +15,49 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { mockWeights } from "@/lib/mock";
+import { getOracleStatus, hoursSince, truncateAddress } from "@/lib/subgraph";
 
-const stats = [
-  {
-    label: "Current Epoch",
-    value: "1",
-    note: "Sample data",
-  },
-  { label: "Push Schedule", value: "00:00", note: "UTC daily + retries" },
-  {
-    label: "Staleness Limit",
-    value: "26 hours",
-    note: "Stale quotes revert distribute",
-  },
-];
+interface WeightRow {
+  key: string;
+  token: string;
+  weightBps: string;
+  share: string;
+}
 
-export default function OraclePage() {
+export default async function OraclePage() {
+  const live = await getOracleStatus();
+
+  const rows: WeightRow[] = live
+    ? live.tokens.map((t) => ({
+        key: t.id,
+        token: truncateAddress(t.id),
+        weightBps: t.weightBps.toLocaleString("en-US"),
+        share: `${(t.weightBps / 100).toFixed(1)}%`,
+      }))
+    : mockWeights.map((w) => ({
+        key: w.token,
+        token: w.token,
+        weightBps: w.weightBps.toLocaleString("en-US"),
+        share: w.share,
+      }));
+
+  const epoch = live ? live.stats.epoch : "1";
+  const pushed = live ? hoursSince(live.stats.lastUpdateAt) : null;
+
+  const stats = [
+    {
+      label: "Current Epoch",
+      value: epoch,
+      note: live ? `Pushed ${pushed}` : "Sample data",
+    },
+    { label: "Push Schedule", value: "00:00", note: "UTC daily + retries" },
+    {
+      label: "Staleness Limit",
+      value: "26 hours",
+      note: live ? `Last push ${pushed}` : "Stale quotes revert distribute",
+    },
+  ];
+
   return (
     <>
       <div>
@@ -38,7 +65,9 @@ export default function OraclePage() {
           <h1 className="font-heading text-5xl font-bold tracking-tight">
             Oracle
           </h1>
-          <Badge variant="secondary">Sample</Badge>
+          <Badge variant={live ? "default" : "secondary"}>
+            {live ? "Live" : "Sample"}
+          </Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
           Weight oracle status and latest push.
@@ -62,7 +91,13 @@ export default function OraclePage() {
       <Card>
         <CardHeader>
           <CardTitle>Latest Global Weights</CardTitle>
-          <CardDescription>SPEC sample. Total: 10,000 bps.</CardDescription>
+          <CardDescription>
+            {live
+              ? `On-chain · total ${live.tokens
+                  .reduce((sum, t) => sum + t.weightBps, 0)
+                  .toLocaleString("en-US")} bps`
+              : "SPEC sample. Total: 10,000 bps."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -74,14 +109,12 @@ export default function OraclePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockWeights.map((w) => (
-                <TableRow key={w.token}>
+              {rows.map((w) => (
+                <TableRow key={w.key}>
                   <TableCell className="font-medium text-primary">
                     {w.token}
                   </TableCell>
-                  <TableCell className="tabular-nums">
-                    {w.weightBps.toLocaleString("en-US")}
-                  </TableCell>
+                  <TableCell className="tabular-nums">{w.weightBps}</TableCell>
                   <TableCell className="tabular-nums">{w.share}</TableCell>
                 </TableRow>
               ))}

@@ -1,0 +1,624 @@
+type AssetActiveSet @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  active: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AssetFeedUpdated @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  feed: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AssetRegistered @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  feed: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Initialized @entity(immutable: true) {
+  id: Bytes!
+  version: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Upgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type IndexCreated @entity(immutable: true) {
+  id: Bytes!
+  indexId: BigInt! # uint256
+  name: String! # string
+  symbol: String! # string
+  legs: [Bytes!]! # tuple[]
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexDeactivated @entity(immutable: true) {
+  id: Bytes!
+  indexId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexUpdated @entity(immutable: true) {
+  id: Bytes!
+  indexId: BigInt! # uint256
+  legs: [Bytes!]! # tuple[]
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexFactoryInitialized @entity(immutable: true) {
+  id: Bytes!
+  version: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexFactoryRoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexFactoryRoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexFactoryRoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexFactoryUpgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type WeightRegistryInitialized @entity(immutable: true) {
+  id: Bytes!
+  version: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeightRegistryRoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeightRegistryRoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeightRegistryRoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeightRegistryUpgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeightsUpdated @entity(immutable: true) {
+  id: Bytes!
+  epochId: BigInt! # uint64
+  tokens: [Bytes!]! # address[]
+  weightsBps: [Int!]! # uint16[]
+  timestamp: BigInt! # uint64
+  intervalSec: BigInt!
+  latenessSec: BigInt!
+  epochGap: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type DustUpdated @entity(immutable: true) {
+  id: Bytes!
+  dustThreshold: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FeeUpdated @entity(immutable: true) {
+  id: Bytes!
+  feeBps: BigInt! # uint256
+  feeTo: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexRouterInitialized @entity(immutable: true) {
+  id: Bytes!
+  version: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LiquidityAdded @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  indexId: BigInt! # uint256
+  epoch: BigInt! # uint64
+  tokenIn: Bytes! # address
+  net: BigInt! # uint256
+  tokenIds: [BigInt!]! # uint256[]
+  filledLegs: Int!
+  skippedLegs: Int!
+  feeBpsAtDeposit: BigInt!
+  feeEstimate: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LiquidityRemoveFailed @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LiquidityRemoved @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  tokenIds: [BigInt!]! # uint256[]
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Permit2Updated @entity(immutable: true) {
+  id: Bytes!
+  permit2: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PoolConfigUpdated @entity(immutable: true) {
+  id: Bytes!
+  fee: Int! # uint24
+  tickSpacing: Int! # int24
+  hooks: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PositionManagerUpdated @entity(immutable: true) {
+  id: Bytes!
+  positionManager: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexRouterRoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexRouterRoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexRouterRoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexRouterUpgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UsdgUpdated @entity(immutable: true) {
+  id: Bytes!
+  usdg: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# ---------- Stats: AssetRegistry ----------
+
+type Asset @entity(immutable: false) {
+  id: Bytes!
+  feed: Bytes!
+  firstFeed: Bytes!
+  active: Boolean!
+  registeredAt: BigInt!
+  activationCount: Int!
+  deactivationCount: Int!
+  feedUpdateCount: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RegistryStats @entity(immutable: false) {
+  id: ID!
+  totalRegistered: Int!
+  totalActive: Int!
+  totalInactive: Int!
+}
+
+type RegistryDaySnapshot @entity(immutable: false) {
+  id: ID!
+  day: BigInt!
+  totalRegistered: Int!
+  totalActive: Int!
+  totalInactive: Int!
+  dailyNew: Int!
+  dailyActivated: Int!
+  dailyDeactivated: Int!
+  dailyFeedUpdates: Int!
+}
+
+# ---------- Stats: IndexFactory ----------
+
+type Index @entity(immutable: false) {
+  id: ID!
+  name: String!
+  symbol: String!
+  exists: Boolean!
+  legCount: Int!
+  updateCount: Int!
+  tokens: [Bytes!]!
+  createdAt: BigInt!
+  lastUpdatedAt: BigInt!
+  deactivatedAt: BigInt
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type IndexLeg @entity(immutable: false) {
+  id: ID!
+  index: Index!
+  legIndex: Int!
+  token: Bytes!
+  quote: Bytes!
+  fee: Int!
+  tickSpacing: Int!
+  hooks: Bytes!
+  isCustom: Boolean!
+}
+
+type IndexVersion @entity(immutable: true) {
+  id: ID!
+  index: Index!
+  version: Int!
+  legCount: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VersionLeg @entity(immutable: true) {
+  id: ID!
+  version: IndexVersion!
+  index: Index!
+  legIndex: Int!
+  token: Bytes!
+  quote: Bytes!
+  fee: Int!
+  tickSpacing: Int!
+  hooks: Bytes!
+}
+
+type TokenStat @entity(immutable: false) {
+  id: Bytes!
+  activeLegCount: Int!
+  activeIndexCount: Int!
+  totalAppearances: Int!
+}
+
+type QuoteStat @entity(immutable: false) {
+  id: Bytes!
+  activeLegCount: Int!
+}
+
+type FactoryStats @entity(immutable: false) {
+  id: ID!
+  totalCreated: Int!
+  totalActive: Int!
+  totalUpdateCount: Int!
+  totalDeactivated: Int!
+  totalLegsActive: Int!
+  customLegs: Int!
+  defaultLegs: Int!
+}
+
+type FactoryDaySnapshot @entity(immutable: false) {
+  id: ID!
+  day: BigInt!
+  created: Int!
+  updated: Int!
+  deactivated: Int!
+  activeEnd: Int!
+}
+
+# ---------- Stats: WeightRegistry ----------
+
+type TokenCurrent @entity(immutable: false) {
+  id: Bytes!
+  weightBps: Int!
+  rank: Int!
+  firstEpoch: BigInt!
+  lastEpoch: BigInt!
+  updateCount: Int!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenEpochWeight @entity(immutable: true) {
+  id: ID!
+  token: Bytes!
+  epochId: BigInt!
+  weightBps: Int!
+  prevWeightBps: Int!
+  deltaBps: Int!
+  rank: Int!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type OracleStats @entity(immutable: false) {
+  id: ID!
+  epoch: BigInt!
+  lastUpdateAt: BigInt!
+  pushCount: Int!
+  knownTokenCount: Int!
+  tokens: [Bytes!]!
+}
+
+type EpochStats @entity(immutable: true) {
+  id: ID!
+  epochId: BigInt!
+  top1Bps: Int!
+  top3Bps: Int!
+  hhi: Int!
+  effectiveN: Int!
+  turnoverBps: Int!
+  tokenCount: Int!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+# ---------- Stats: IndexRouter ----------
+
+type GlobalStats @entity(immutable: false) {
+  id: ID!
+  totalNetETH: BigInt!
+  totalNetUSDG: BigInt!
+  depositCount: BigInt!
+  uniqueDepositors: BigInt!
+  repeatDepositors: BigInt!
+  mintedCount: BigInt!
+  burnedCount: BigInt!
+  activeCount: BigInt!
+  totalLegs: BigInt!
+  filledLegs: BigInt!
+  skippedLegs: BigInt!
+  removeAttempts: BigInt!
+  removeFailures: BigInt!
+  removeSuccesses: BigInt!
+  totalFeeETH: BigInt!
+  totalFeeUSDG: BigInt!
+}
+
+type IndexStats @entity(immutable: false) {
+  id: ID!
+  totalNetETH: BigInt!
+  totalNetUSDG: BigInt!
+  depositCount: BigInt!
+  uniqueDepositors: BigInt!
+  mintedCount: BigInt!
+  burnedCount: BigInt!
+  activeCount: BigInt!
+  filledLegs: BigInt!
+  skippedLegs: BigInt!
+  removeAttempts: BigInt!
+  removeFailures: BigInt!
+  removeSuccesses: BigInt!
+  totalFeeETH: BigInt!
+  totalFeeUSDG: BigInt!
+  lastEpochSeen: BigInt!
+}
+
+type UserStats @entity(immutable: false) {
+  id: Bytes!
+  totalNetETH: BigInt!
+  totalNetUSDG: BigInt!
+  depositCount: BigInt!
+  ethDeposits: BigInt!
+  usdgDeposits: BigInt!
+  filledLegs: BigInt!
+  skippedLegs: BigInt!
+  removeAttempts: BigInt!
+  removeFailures: BigInt!
+  firstDepositAt: BigInt!
+  lastDepositAt: BigInt!
+}
+
+type Position @entity(immutable: false) {
+  id: ID!
+  tokenId: BigInt!
+  manager: Bytes!
+  index: IndexStats!
+  owner: Bytes!
+  createdAt: BigInt!
+  burnedAt: BigInt
+  active: Boolean!
+}
+
+type RouterConfig @entity(immutable: false) {
+  id: ID!
+  feeBps: BigInt!
+  feeTo: Bytes!
+  poolFee: Int!
+  poolTickSpacing: Int!
+  poolHooks: Bytes!
+  usdg: Bytes!
+  positionManager: Bytes!
+  permit2: Bytes!
+  dustThreshold: BigInt!
+  paused: Boolean!
+}
+
+type FailedRemoveTx @entity(immutable: false) {
+  id: ID!
+  tokenIds: [BigInt!]!
+}
+
+type GlobalDaySnapshot @entity(immutable: false) {
+  id: ID!
+  day: BigInt!
+  volumeETH: BigInt!
+  volumeUSDG: BigInt!
+  depositCount: BigInt!
+  removeCount: BigInt!
+  newDepositors: BigInt!
+}
+
+type IndexDaySnapshot @entity(immutable: false) {
+  id: ID!
+  index: IndexStats!
+  day: BigInt!
+  volumeETH: BigInt!
+  volumeUSDG: BigInt!
+  depositCount: BigInt!
+  removeCount: BigInt!
+  activeEnd: BigInt!
+}
