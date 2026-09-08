@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useBalance, useReadContract } from "wagmi";
+import { DepositStepsModal } from "@/components/deposit-steps-modal";
 import { TokenIcon } from "@/components/token-icon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +61,8 @@ export function ProvideLiquidityModal({
   const [token, setToken] = useState<"ETH" | "USDG">("USDG");
   const [amount, setAmount] = useState("");
   const [skipped, setSkipped] = useState<string[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
 
   const { address } = useAccount();
   const native = useBalance({ address, chainId: robinhood.id });
@@ -130,11 +132,9 @@ export function ProvideLiquidityModal({
   function fillMax() {
     if (balance === null) return;
     setAmount(String(Number(balance.toFixed(6))));
-    setSubmitted(false);
   }
 
   function toggleSkip(symbol: string, include: boolean) {
-    setSubmitted(false);
     setSkipped((prev) =>
       include ? prev.filter((s) => s !== symbol) : [...prev, symbol],
     );
@@ -142,8 +142,10 @@ export function ProvideLiquidityModal({
 
   return (
     <Dialog
-      onOpenChange={(open) => {
-        if (!open) setSubmitted(false);
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setShowSteps(false);
       }}
     >
       <DialogTrigger render={<Button />}>
@@ -166,10 +168,7 @@ export function ProvideLiquidityModal({
               value={[token]}
               onValueChange={(v) => {
                 const next = v[0];
-                if (next === "ETH" || next === "USDG") {
-                  setToken(next);
-                  setSubmitted(false);
-                }
+                if (next === "ETH" || next === "USDG") setToken(next);
               }}
             >
               <ToggleGroupItem value="ETH">ETH (native)</ToggleGroupItem>
@@ -188,7 +187,6 @@ export function ProvideLiquidityModal({
               value={amount}
               onChange={(e) => {
                 setAmount(e.target.value);
-                setSubmitted(false);
               }}
             />
             <div className="flex items-center justify-between text-xs">
@@ -221,11 +219,7 @@ export function ProvideLiquidityModal({
             </div>
           </Field>
 
-          {token === "USDG" ? (
-            <p className="text-xs text-muted-foreground">
-              You approve USDG spending first, then deposit.
-            </p>
-          ) : (
+          {token !== "USDG" && (
             <Alert>
               <AlertTitle>ETH won&apos;t work here</AlertTitle>
               <AlertDescription>This index only accepts USDG.</AlertDescription>
@@ -299,19 +293,6 @@ export function ProvideLiquidityModal({
               )}
             </div>
           )}
-
-          {submitted && (
-            <Alert>
-              <AlertTitle>
-                {address ? "Deposits aren't live yet" : "Connect your wallet"}
-              </AlertTitle>
-              <AlertDescription>
-                {address
-                  ? "You're previewing only."
-                  : "Nothing has been sent yet."}
-              </AlertDescription>
-            </Alert>
-          )}
         </div>
 
         <DialogFooter>
@@ -320,12 +301,27 @@ export function ProvideLiquidityModal({
           </DialogClose>
           <Button
             disabled={!valid || !quoteEligible || insufficient}
-            onClick={() => setSubmitted(true)}
+            onClick={() => {
+              setOpen(false);
+              setShowSteps(true);
+            }}
           >
             Deposit {valid ? `${fmt(amt)} ${token}` : ""}
           </Button>
         </DialogFooter>
       </DialogContent>
+      <DepositStepsModal
+        open={showSteps}
+        onOpenChange={setShowSteps}
+        onBack={() => {
+          setShowSteps(false);
+          setOpen(true);
+        }}
+        indexName={name}
+        token={token}
+        amount={valid ? fmt(amt) : amount}
+        checking={balanceLoading}
+      />
     </Dialog>
   );
 }

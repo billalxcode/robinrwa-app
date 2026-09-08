@@ -238,6 +238,10 @@ Konten: putih, `rounded-xl`, `p-6`, `shadow` elevasi. Dialog WAJIB punya
 Title (+ Description bila ada konsekuensi). Menu/popover WAJIB
 `border-border`. Tooltip: primer (teks putih). Toast: `rounded-xl`.
 Kalender: mengikuti token seleksi primer.
+Alur multi-langkah WAJIB modal stepper terpisah: 1 status per langkah
+(nomor → spinner saat loading → centang saat done → terkunci), tombol aksi
+nonaktif WAJIB alasan 1 baris, tidak ada transaksi palsu (simulasi
+DILARANG).
 
 ### 7.8 Tabs / Pagination / Breadcrumb / Accordion
 Tabs: trigger `rounded-lg`, hover menaikkan kontras, aktif tegas.
