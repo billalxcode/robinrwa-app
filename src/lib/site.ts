@@ -16,7 +16,9 @@ export function breadcrumbTrail(pathname: string): string[] {
   if (pathname === "/") return ["Home"];
   const parts = pathname.split("/").filter(Boolean);
   if (parts[0] === "indexes" && parts[1]) {
-    return ["Home", "Index", indexNames[parts[1]] ?? parts[1].toUpperCase()];
+    const known = indexNames[parts[1]];
+    if (known) return ["Home", "Index", known];
+    return ["Home", "Index", `Index ${parts[1]}`];
   }
   const seg = pathLabels[pathname];
   if (!seg) return ["Home"];
