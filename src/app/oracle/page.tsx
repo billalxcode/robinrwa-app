@@ -14,12 +14,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TokenIcon } from "@/components/token-icon";
 import { mockWeights } from "@/lib/mock";
-import { getOracleStatus, hoursSince, truncateAddress } from "@/lib/subgraph";
+import {
+  PLACEHOLDER_LOGO,
+  assetLabel,
+  getAsset,
+} from "@/lib/assets";
+import { getOracleStatus, hoursSince } from "@/lib/subgraph";
 
 interface WeightRow {
   key: string;
   token: string;
+  logo: string;
   weightBps: string;
   share: string;
 }
@@ -28,15 +35,20 @@ export default async function OraclePage() {
   const live = await getOracleStatus();
 
   const rows: WeightRow[] = live
-    ? live.tokens.map((t) => ({
-        key: t.id,
-        token: truncateAddress(t.id),
-        weightBps: t.weightBps.toLocaleString("en-US"),
-        share: `${(t.weightBps / 100).toFixed(1)}%`,
-      }))
+    ? live.tokens.map((t) => {
+        const asset = getAsset(t.id);
+        return {
+          key: t.id,
+          token: assetLabel(asset),
+          logo: asset.logo,
+          weightBps: t.weightBps.toLocaleString("en-US"),
+          share: `${(t.weightBps / 100).toFixed(1)}%`,
+        };
+      })
     : mockWeights.map((w) => ({
         key: w.token,
         token: w.token,
+        logo: PLACEHOLDER_LOGO,
         weightBps: w.weightBps.toLocaleString("en-US"),
         share: w.share,
       }));
@@ -112,7 +124,10 @@ export default async function OraclePage() {
               {rows.map((w) => (
                 <TableRow key={w.key}>
                   <TableCell className="font-medium text-primary">
-                    {w.token}
+                    <span className="flex items-center gap-2">
+                      <TokenIcon src={w.logo} label={w.token} />
+                      {w.token}
+                    </span>
                   </TableCell>
                   <TableCell className="tabular-nums">{w.weightBps}</TableCell>
                   <TableCell className="tabular-nums">{w.share}</TableCell>
