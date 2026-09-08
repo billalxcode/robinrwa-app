@@ -28,7 +28,7 @@ import {
   WEIGHT_REGISTRY,
   weightRegistryAbi,
 } from "@/lib/contracts";
-import { getLegConfigs } from "@/lib/quote";
+import { getLegConfigs, mergeSkipLists } from "@/lib/quote";
 import { getPublicClient } from "@/lib/web3";
 
 export interface StepLeg {
@@ -170,14 +170,16 @@ export function DepositStepsModal({
         .filter((_, i) => skipped.includes(i))
         .map((l) => l.tokenAddress);
       if (skippedTokens.length > 0) setSkippedByPrice(skippedTokens);
-      const skip = legs
-        .filter(
-          (l) =>
-            skippedAddresses.some(
-              (s) => s.toLowerCase() === l.tokenAddress.toLowerCase(),
-            ) || skippedTokens.includes(l.tokenAddress),
-        )
-        .map((l) => l.tokenAddress as `0x${string}`);
+      const skipAddrs = mergeSkipLists(legs, skippedAddresses, skippedTokens);
+      if (skipAddrs.length >= legs.length) {
+        // Sending this would revert NoEligibleLegs on-chain and burn gas.
+        // Block it here with an honest error instead.
+        setQuoteError(
+          "No legs ready — every leg is skipped or has no pool. Nothing was sent.",
+        );
+        return;
+      }
+      const skip = skipAddrs.map((a) => a as `0x${string}`);
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
       const indexIdBig = BigInt(indexId ?? "0");
       if (token === "ETH") {

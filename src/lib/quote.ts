@@ -156,6 +156,27 @@ export interface QuotedLeg {
   reason: string | null;
 }
 
+/// @dev Merges user-skipped + price-skipped token addresses (deduped,
+/// in leg order). If the result covers every leg, the caller MUST NOT send
+/// the tx — the contract reverts NoEligibleLegs and gas is burned.
+export function mergeSkipLists(
+  legs: { tokenAddress: string }[],
+  skippedAddresses: string[],
+  priceSkipped: string[],
+): string[] {
+  const user = new Set(skippedAddresses.map((s) => s.toLowerCase()));
+  const price = new Set(priceSkipped.map((s) => s.toLowerCase()));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const l of legs) {
+    const a = l.tokenAddress.toLowerCase();
+    if ((user.has(a) || price.has(a)) && !seen.has(a)) {
+      seen.add(a);
+      out.push(l.tokenAddress);
+    }
+  }
+  return out;
+}
 /// @dev Builds per-leg configs aligned with the input leg order (the
 /// contract requires 1:1 alignment; skipped legs MUST still get a
 /// well-formed config). Legs without a usable pool fall back to the
