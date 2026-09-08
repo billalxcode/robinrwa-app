@@ -110,10 +110,10 @@ export default async function OraclePage() {
           <CardTitle>Latest Global Weights</CardTitle>
           <CardDescription>
             {live
-              ? `On-chain · total ${live.tokens
+              ? `On-chain total of ${live.tokens
                   .reduce((sum, t) => sum + t.weightBps, 0)
                   .toLocaleString("en-US")} bps`
-              : "SPEC sample. Total: 10,000 bps."}
+              : "SPEC sample total of 10,000 bps."}
           </CardDescription>
         </CardHeader>
         <CardContent>

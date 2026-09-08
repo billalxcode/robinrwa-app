@@ -11,6 +11,11 @@
 export const PLACEHOLDER_LOGO =
   "https://assets.coingecko.com/coins/images/102174110/standard/0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec.png?1782444565";
 
+// USDG (Robinhood USD) — quote token for all index legs. Address documented
+// in docs/LAPORAN-LIKUIDITAS.md.
+export const USDG_ADDRESS =
+  "0x5fc5360d0400a0fd4f2af552add042d716f1d168" as const;
+
 // Robinscan asset logo API (verified: returns per-ticker PNG).
 export function robinscanLogo(ticker: string, size = 512): string {
   return `https://robinscan.io/api/assets/logo/${ticker}?size=${size}`;

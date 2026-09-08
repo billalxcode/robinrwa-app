@@ -2,6 +2,9 @@
 
 import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import { erc20Abi, formatUnits } from "viem";
+import { useAccount, useBalance, useReadContract } from "wagmi";
+import { TokenIcon } from "@/components/token-icon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +23,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { USDG_ADDRESS } from "@/lib/assets";
 import type { MockTokenWeight } from "@/lib/mock";
+import { robinhood } from "@/lib/web3";
 
 const FEE_BPS = 20;
 const BPS_DENOM = 10_000;
@@ -34,28 +39,69 @@ function fmt(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 6 });
 }
 
+export interface ModalLeg {
+  /** Matches MockTokenWeight.token label. */
+  token: string;
+  quote: string;
+  fee: number;
+  tickSpacing: number;
+  logo: string;
+}
+
 export function ProvideLiquidityModal({
   name,
   tokens,
+  legs,
 }: {
   name: string;
   tokens: MockTokenWeight[];
+  legs?: ModalLeg[];
 }) {
   const [token, setToken] = useState<"ETH" | "USDG">("USDG");
   const [amount, setAmount] = useState("");
   const [skipped, setSkipped] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
+  const { address } = useAccount();
+  const native = useBalance({ address, chainId: robinhood.id });
+  const usdgBalance = useReadContract({
+    address: USDG_ADDRESS,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [address ?? "0x0000000000000000000000000000000000000000"],
+    query: { enabled: !!address },
+  });
+  const usdgDecimals = useReadContract({
+    address: USDG_ADDRESS,
+    abi: erc20Abi,
+    functionName: "decimals",
+    query: { enabled: !!address },
+  });
+
+  const balance: number | null =
+    token === "ETH"
+      ? native.data
+        ? Number(native.data.formatted)
+        : null
+      : usdgBalance.data === undefined
+        ? null
+        : Number(formatUnits(usdgBalance.data, usdgDecimals.data ?? 18));
+  const balanceLoading =
+    !!address && (native.isLoading || usdgBalance.isLoading);
+
   const amt = Number(amount);
   const valid = Number.isFinite(amt) && amt > 0;
   const quoteEligible = token === LEG_QUOTE;
+  const insufficient =
+    valid && balance !== null && !balanceLoading && amt > balance;
 
   const { fee, net, rows } = useMemo(() => {
+    type Row = { token: string; inflow: number; share: string };
     if (!valid || !quoteEligible)
       return {
         fee: 0,
         net: 0,
-        rows: [] as { token: string; inflow: number }[],
+        rows: [] as Row[],
       };
     const computedFee = (amt * FEE_BPS) / BPS_DENOM;
     const computedNet = amt - computedFee;
@@ -65,7 +111,7 @@ export function ProvideLiquidityModal({
       return {
         fee: computedFee,
         net: computedNet,
-        rows: [] as { token: string; inflow: number }[],
+        rows: [] as Row[],
       };
     let distributed = 0;
     let top = 0;
@@ -74,12 +120,18 @@ export function ProvideLiquidityModal({
         Math.floor(((computedNet * t.weightBps) / total) * 1e6) / 1e6;
       distributed += inflow;
       if (i === 0 || t.weightBps > active[top].weightBps) top = i;
-      return { token: t.token, inflow };
+      return { token: t.token, inflow, share: t.share };
     });
     // Remainder to the largest leg, like _resolveWeights.
     if (computed.length > 0) computed[top].inflow += computedNet - distributed;
     return { fee: computedFee, net: computedNet, rows: computed };
   }, [amt, valid, quoteEligible, skipped, tokens]);
+
+  function fillMax() {
+    if (balance === null) return;
+    setAmount(String(Number(balance.toFixed(6))));
+    setSubmitted(false);
+  }
 
   function toggleSkip(symbol: string, include: boolean) {
     setSubmitted(false);
@@ -140,6 +192,34 @@ export function ProvideLiquidityModal({
                 setSubmitted(false);
               }}
             />
+            <div className="flex items-center justify-between text-xs">
+              {address ? (
+                <>
+                  <span className="text-muted-foreground">
+                    Balance:{" "}
+                    {balance === null ? (
+                      "…"
+                    ) : (
+                      <span className="tabular-nums">
+                        {fmt(balance)} {token}
+                      </span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={balance === null || balance <= 0}
+                    onClick={fillMax}
+                    className="font-medium text-primary hover:underline disabled:opacity-50"
+                  >
+                    Max
+                  </button>
+                </>
+              ) : (
+                <span className="text-muted-foreground">
+                  Connect a wallet to see balance.
+                </span>
+              )}
+            </div>
           </Field>
 
           {token === "USDG" ? (
@@ -172,27 +252,49 @@ export function ProvideLiquidityModal({
                   {fmt(net)} {token}
                 </span>
               </div>
-              {rows.map((r) => (
-                <div key={r.token} className="flex items-center gap-3 text-sm">
-                  <Badge variant="outline" className="w-20 justify-center">
-                    {r.token}
-                  </Badge>
-                  <span className="flex-1 tabular-nums">
-                    {fmt(r.inflow)} {token}
-                  </span>
-                  <Label
-                    htmlFor={`skip-${r.token}`}
-                    className="text-xs text-muted-foreground"
+              {rows.map((r) => {
+                const info = legs?.find((l) => l.token === r.token);
+                return (
+                  <div
+                    key={r.token}
+                    className="flex items-center gap-3 text-sm"
                   >
-                    {skipped.includes(r.token) ? "Skipped" : "Include"}
-                  </Label>
-                  <Switch
-                    id={`skip-${r.token}`}
-                    checked={!skipped.includes(r.token)}
-                    onCheckedChange={(include) => toggleSkip(r.token, include)}
-                  />
-                </div>
-              ))}
+                    {info ? (
+                      <TokenIcon src={info.logo} label={r.token} />
+                    ) : (
+                      <Badge variant="outline" className="w-20 justify-center">
+                        {r.token}
+                      </Badge>
+                    )}
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="font-medium">{r.token}</span>
+                        <span className="tabular-nums">
+                          {fmt(r.inflow)} {token}
+                        </span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {info
+                          ? `In ${info.quote} pool, ${(info.fee / 10000).toFixed(2)}% fee, ${r.share} share`
+                          : `${r.share} share`}
+                      </span>
+                    </span>
+                    <Label
+                      htmlFor={`skip-${r.token}`}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {skipped.includes(r.token) ? "Skipped" : "Include"}
+                    </Label>
+                    <Switch
+                      id={`skip-${r.token}`}
+                      checked={!skipped.includes(r.token)}
+                      onCheckedChange={(include) =>
+                        toggleSkip(r.token, include)
+                      }
+                    />
+                  </div>
+                );
+              })}
               <p className="text-xs text-muted-foreground">
                 Skipped legs map to{" "}
                 <code className="font-mono">skipTokens[]</code>. Dust and failed
@@ -200,15 +302,23 @@ export function ProvideLiquidityModal({
                 come from the <code className="font-mono">LiquidityAdded</code>{" "}
                 event.
               </p>
+              {insufficient && (
+                <p className="text-xs font-medium text-destructive">
+                  Insufficient {token} balance.
+                </p>
+              )}
             </div>
           )}
 
           {submitted && (
             <Alert>
-              <AlertTitle>Wallet not connected</AlertTitle>
+              <AlertTitle>
+                {address ? "On-chain submit not wired" : "Wallet not connected"}
+              </AlertTitle>
               <AlertDescription>
-                Preview only — no transaction was sent. Connect a wallet, fund
-                it with {token}, then submit again.
+                {address
+                  ? "Preview only — no transaction was sent. On-chain deposit via IndexRouter lands in the next phase."
+                  : `Preview only — no transaction was sent. Connect a wallet, fund it with ${token}, then submit again.`}
               </AlertDescription>
             </Alert>
           )}
@@ -219,7 +329,7 @@ export function ProvideLiquidityModal({
             Cancel
           </DialogClose>
           <Button
-            disabled={!valid || !quoteEligible}
+            disabled={!valid || !quoteEligible || insufficient}
             onClick={() => setSubmitted(true)}
           >
             Deposit {valid ? `${fmt(amt)} ${token}` : ""}

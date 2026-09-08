@@ -121,9 +121,12 @@ function LiveBody({
             </Badge>
             <Badge variant="outline">{index.symbol}</Badge>
           </div>
-          <p className="mt-2 text-muted-foreground">
-            {index.legCount} legs · created {formatDate(index.createdAt)}.
-          </p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <Badge variant="outline">{index.legCount} legs</Badge>
+            <Badge variant="outline">
+              Created {formatDate(index.createdAt)}
+            </Badge>
+          </div>
         </div>
         <ProvideLiquidityModal
           name={index.name}
@@ -132,6 +135,13 @@ function LiveBody({
             weightBps: l.weightBps,
             share: l.share,
           }))}
+          legs={legRows.map((l) => ({
+            token: l.ticker,
+            quote: l.quoteTicker,
+            fee: l.fee,
+            tickSpacing: l.tickSpacing,
+            logo: l.logo,
+          }))}
         />
       </div>
 
@@ -139,14 +149,18 @@ function LiveBody({
         <StatCard
           label="Legs"
           value={String(index.legCount)}
-          note={`${quotes.join(" · ")} quotes`}
+          note={
+            quotes.length > 1
+              ? `${quotes.length} quote tokens`
+              : `${quotes[0] ?? "—"} quotes`
+          }
         />
         <StatCard
           label="Top Weight"
           value={`${(top / 100).toFixed(1)}%`}
           note={`Epoch ${epoch ?? "—"}`}
         />
-        <StatCard label="Epoch" value={epoch ?? "—"} note={oracleNote(epoch)} />
+        <StatCard label="Epoch" value={epoch ?? "—"} note="Weight version" />
         <StatCard
           label="Deposits"
           value={String(deposits.length)}
@@ -192,9 +206,7 @@ function LiveBody({
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Weight Distribution</CardTitle>
-            <CardDescription>
-              Epoch {epoch ?? "—"} · total 10,000 bps
-            </CardDescription>
+            <CardDescription>Total 10,000 bps.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {legRows.map((l) => (
@@ -223,9 +235,7 @@ function LiveBody({
       <Card>
         <CardHeader>
           <CardTitle>Tokens in This Index</CardTitle>
-          <CardDescription>
-            {legRows.length} legs · Uniswap v4 pools
-          </CardDescription>
+          <CardDescription>Uniswap v4 pools.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -278,10 +288,6 @@ function LiveBody({
       </Card>
     </>
   );
-}
-
-function oracleNote(epoch: string | null): string {
-  return epoch ? `Live · epoch ${epoch}` : "Sample data";
 }
 
 function MockBody({ index }: { index: MockIndex }) {
@@ -370,9 +376,7 @@ function MockBody({ index }: { index: MockIndex }) {
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Weight Distribution</CardTitle>
-            <CardDescription>
-              Epoch {index.epoch} · total 10,000 bps
-            </CardDescription>
+            <CardDescription>Total 10,000 bps.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {index.tokens.map((t) => (
@@ -398,9 +402,7 @@ function MockBody({ index }: { index: MockIndex }) {
       <Card>
         <CardHeader>
           <CardTitle>Tokens in This Index</CardTitle>
-          <CardDescription>
-            {index.tokens.length} constituents · {index.network}
-          </CardDescription>
+          <CardDescription>{index.network}.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

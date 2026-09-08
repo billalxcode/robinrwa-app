@@ -38,7 +38,7 @@ export default async function Home() {
     {
       label: "Total Indexes",
       value: live ? String(list.totalActive) : "3",
-      note: live ? `${list.totalCreated} created` : "2 active · 1 inactive",
+      note: live ? `${list.totalCreated} created` : "2 active, 1 inactive",
     },
     { label: "My Positions", value: "0", note: "Connect a wallet to start" },
     {

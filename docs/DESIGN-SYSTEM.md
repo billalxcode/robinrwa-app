@@ -82,6 +82,13 @@ Aturan:
   data."). Contoh yang BOLEH: "One deposit split by volume weight."
 - Daftar token/simbol DILARANG memakai pemisah teks (`·`, `,`, `/`).
   WAJIB badge `outline` tersusun `flex flex-wrap gap-1.5`.
+- Pemisah `·` antar fakta DILARANG di semua UI. Gabungan dua fakta WAJIB
+  dipecah: badge terpisah, baris terpisah, atau koma natural
+  ("In USDG pool, 0.30% fee, 33.3% share"). Judul metadata HTML dikecualikan.
+- Baris estimasi deposit WAJIB format: logo + ticker + nominal
+  (`tabular-nums`), baris kedua muted: `→ QUOTE · fee% · share%`.
+- Saldo tampil di bawah input jumlah + tombol teks `Max`; saldo kurang
+  WAJIB menonaktifkan submit + hint merah 1 baris.
 - Bold (`font-bold`) BOLEH hanya untuk H1/H2 dan angka hero. Body bold
   DILARANG (pakai `font-medium`/`semibold`).
 - `tracking-tight` WAJIB untuk H1, DILARANG untuk body.
