@@ -11,6 +11,11 @@
 export const PLACEHOLDER_LOGO =
   "https://assets.coingecko.com/coins/images/102174110/standard/0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec.png?1782444565";
 
+// Robinscan asset logo API (verified: returns per-ticker PNG).
+export function robinscanLogo(ticker: string, size = 512): string {
+  return `https://robinscan.io/api/assets/logo/${ticker}?size=${size}`;
+}
+
 export interface AssetMetadata {
   /** Lowercase contract address. */
   address: string;
@@ -24,21 +29,32 @@ export interface AssetMetadata {
   decimals: number | null;
 }
 
-function entry(address: string): AssetMetadata {
-  return {
-    address: address.toLowerCase(),
-    name: null,
-    ticker: null,
-    logo: PLACEHOLDER_LOGO,
-    decimals: null,
-  };
-}
-
 // Constituents observed on-chain (WeightRegistry epoch 1, subgraph).
+// Identity verified against Robinscan token pages (titles observed
+// in-session): NVDA, SPCX, AAPL — all "• Robinhood Token" ERC-20s.
+// Decimals 18 observed on the NVDA page; others unresolved (null).
 const KNOWN_ASSETS: AssetMetadata[] = [
-  entry("0x4a0e65a3eccec6dbe60ae065f2e7bb85fae35eea"),
-  entry("0xaf3d76f1834a1d425780943c99ea8a608f8a93f9"),
-  entry("0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec"),
+  {
+    address: "0x4a0e65a3eccec6dbe60ae065f2e7bb85fae35eea",
+    name: "Space Exploration Technologies Corp. Class A Common Stock • Robinhood Token",
+    ticker: "SPCX",
+    logo: robinscanLogo("SPCX"),
+    decimals: null,
+  },
+  {
+    address: "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9",
+    name: "Apple • Robinhood Token",
+    ticker: "AAPL",
+    logo: robinscanLogo("AAPL"),
+    decimals: null,
+  },
+  {
+    address: "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",
+    name: "NVIDIA • Robinhood Token",
+    ticker: "NVDA",
+    logo: robinscanLogo("NVDA"),
+    decimals: 18,
+  },
 ];
 
 const byAddress = new Map(KNOWN_ASSETS.map((a) => [a.address, a]));

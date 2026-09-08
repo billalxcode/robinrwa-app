@@ -1,5 +1,7 @@
+import { ExternalLink } from "lucide-react";
 import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,11 +20,14 @@ import {
 import { assetLabel, getAsset, PLACEHOLDER_LOGO } from "@/lib/assets";
 import { mockWeights } from "@/lib/mock";
 import { getOracleStatus, hoursSince } from "@/lib/subgraph";
+import { explorerTokenUrl } from "@/lib/web3";
 
 interface WeightRow {
   key: string;
   token: string;
+  name: string | null;
   logo: string;
+  explorer: string | null;
   weightBps: string;
   share: string;
 }
@@ -36,7 +41,9 @@ export default async function OraclePage() {
         return {
           key: t.id,
           token: assetLabel(asset),
+          name: asset.name,
           logo: asset.logo,
+          explorer: explorerTokenUrl(t.id),
           weightBps: t.weightBps.toLocaleString("en-US"),
           share: `${(t.weightBps / 100).toFixed(1)}%`,
         };
@@ -44,7 +51,9 @@ export default async function OraclePage() {
     : mockWeights.map((w) => ({
         key: w.token,
         token: w.token,
+        name: null,
         logo: PLACEHOLDER_LOGO,
+        explorer: null,
         weightBps: w.weightBps.toLocaleString("en-US"),
         share: w.share,
       }));
@@ -114,19 +123,48 @@ export default async function OraclePage() {
                 <TableHead>Token</TableHead>
                 <TableHead>Weight (bps)</TableHead>
                 <TableHead>Share</TableHead>
+                <TableHead>Explorer</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((w) => (
                 <TableRow key={w.key}>
-                  <TableCell className="font-medium text-primary">
+                  <TableCell>
                     <span className="flex items-center gap-2">
                       <TokenIcon src={w.logo} label={w.token} />
-                      {w.token}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="font-medium text-primary">
+                          {w.token}
+                        </span>
+                        {w.name ? (
+                          <span className="max-w-56 truncate text-xs text-muted-foreground">
+                            {w.name}
+                          </span>
+                        ) : null}
+                      </span>
                     </span>
                   </TableCell>
                   <TableCell className="tabular-nums">{w.weightBps}</TableCell>
                   <TableCell className="tabular-nums">{w.share}</TableCell>
+                  <TableCell>
+                    {w.explorer ? (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        nativeButton={false}
+                        render={
+                          <a href={w.explorer} target="_blank" rel="noreferrer">
+                            <ExternalLink />
+                            <span className="sr-only">
+                              View {w.token} on explorer
+                            </span>
+                          </a>
+                        }
+                      />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -16,6 +16,12 @@ export const ROBINHOOD_EXPLORER_URL =
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+// Verified pattern (Robinscan token page observed in-session):
+// https://robinscan.io/token/{address}
+export function explorerTokenUrl(address: string): string {
+  return `${ROBINHOOD_EXPLORER_URL}/token/${address}`;
+}
+
 // Robinhood Chain mainnet (EVM, chainId 4663). Shape per Context7
 // Dok: /reown-com/reown-docs — custom networks via defineChain.
 export const robinhood = defineChain({
