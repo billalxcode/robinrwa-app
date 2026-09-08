@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -14,13 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TokenIcon } from "@/components/token-icon";
+import { assetLabel, getAsset, PLACEHOLDER_LOGO } from "@/lib/assets";
 import { mockWeights } from "@/lib/mock";
-import {
-  PLACEHOLDER_LOGO,
-  assetLabel,
-  getAsset,
-} from "@/lib/assets";
 import { getOracleStatus, hoursSince } from "@/lib/subgraph";
 
 interface WeightRow {
