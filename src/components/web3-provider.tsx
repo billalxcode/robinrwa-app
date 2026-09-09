@@ -22,18 +22,18 @@ const wagmiAdapter = new WagmiAdapter({
 
 // Modal setup runs outside components (Dok: /reown-com/reown-docs —
 // Next.js implementation). Theme matches the app design system:
-// Poppins, brand blue accent, 16px card radius.
+// Inter, brand lime accent, 12px card radius.
 createAppKit({
   adapters: [wagmiAdapter],
   networks,
   defaultNetwork: robinhood,
   projectId: REOWN_PROJECT_ID,
   metadata: web3Metadata,
-  themeMode: "light",
+  themeMode: "dark",
   themeVariables: {
-    "--apkt-font-family": '"Poppins", "Inter", Arial, sans-serif',
-    "--apkt-accent": "#2447F9",
-    "--apkt-border-radius-master": "16px",
+    "--apkt-font-family": '"Inter", "Inter Fallback", Arial, sans-serif',
+    "--apkt-accent": "#CCFF00",
+    "--apkt-border-radius-master": "12px",
   },
 });
 

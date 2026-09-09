@@ -21,20 +21,20 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
       height: 260,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#4e5560",
+        textColor: "#8f8e8e",
         attributionLogo: false,
       },
       grid: {
         vertLines: { visible: false },
-        horzLines: { color: "#e5e7eb" },
+        horzLines: { color: "rgba(255, 255, 255, 0.06)" },
       },
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false },
     });
     const series = chart.addSeries(AreaSeries, {
-      lineColor: "#2447f9",
-      topColor: "rgba(36, 71, 249, 0.35)",
-      bottomColor: "rgba(36, 71, 249, 0.0)",
+      lineColor: "#ccff00",
+      topColor: "rgba(204, 255, 0, 0.35)",
+      bottomColor: "rgba(204, 255, 0, 0.0)",
       lineWidth: 2,
     });
     series.setData(data);
