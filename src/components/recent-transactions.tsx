@@ -2,6 +2,8 @@
 
 import { GraphQLClient, gql } from "graphql-request";
 import { useEffect, useState } from "react";
+import { erc20Abi, formatUnits } from "viem";
+import { useReadContract } from "wagmi";
 import {
   Card,
   CardContent,
@@ -18,12 +20,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { USDG_ADDRESS } from "@/lib/assets";
 import { hoursSince, truncateAddress } from "@/lib/subgraph";
 import { explorerAddressUrl, explorerTxUrl } from "@/lib/web3";
 
 interface DepositTx {
   user: string;
   epoch: string;
+  tokenIn: string;
+  net: string;
   tokenIds: string[];
   filledLegs: number;
   skippedLegs: number;
@@ -45,6 +50,8 @@ const RecentTxQuery = gql`
     ) {
       user
       epoch
+      tokenIn
+      net
       tokenIds
       filledLegs
       skippedLegs
@@ -54,10 +61,42 @@ const RecentTxQuery = gql`
   }
 `;
 
+function formatAmount(
+  net: string,
+  tokenIn: string,
+  usdgDecimals: number | undefined,
+): string {
+  try {
+    const value = BigInt(net);
+    if (/^0x0+$/.test(tokenIn.toLowerCase())) {
+      return `${Number(formatUnits(value, 18)).toLocaleString("en-US", {
+        maximumFractionDigits: 6,
+      })} ETH`;
+    }
+    if (
+      tokenIn.toLowerCase() === USDG_ADDRESS.toLowerCase() &&
+      usdgDecimals !== undefined
+    ) {
+      return `${Number(formatUnits(value, usdgDecimals)).toLocaleString(
+        "en-US",
+        { maximumFractionDigits: 6 },
+      )} USDG`;
+    }
+  } catch {
+    // Fall through to raw display below.
+  }
+  return `${net} units`;
+}
+
 const REFRESH_MS = 10_000;
 
 export function RecentTransactions({ indexId }: { indexId: string }) {
   const [rows, setRows] = useState<DepositTx[] | null>(null);
+  const usdgDecimals = useReadContract({
+    address: USDG_ADDRESS,
+    abi: erc20Abi,
+    functionName: "decimals",
+  });
 
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
@@ -103,6 +142,7 @@ export function RecentTransactions({ indexId }: { indexId: string }) {
               <TableRow>
                 <TableHead>Transaction</TableHead>
                 <TableHead>User</TableHead>
+                <TableHead>Amount</TableHead>
                 <TableHead>Epoch</TableHead>
                 <TableHead>Legs</TableHead>
                 <TableHead>Age</TableHead>
@@ -130,6 +170,9 @@ export function RecentTransactions({ indexId }: { indexId: string }) {
                     >
                       {truncateAddress(tx.user)}
                     </a>
+                  </TableCell>
+                  <TableCell className="tabular-nums">
+                    {formatAmount(tx.net, tx.tokenIn, usdgDecimals.data)}
                   </TableCell>
                   <TableCell className="tabular-nums">{tx.epoch}</TableCell>
                   <TableCell className="tabular-nums">
