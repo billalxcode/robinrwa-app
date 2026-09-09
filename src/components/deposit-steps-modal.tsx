@@ -2,6 +2,7 @@
 
 import { useAppKit } from "@reown/appkit/react";
 import { Check } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { decodeEventLog, erc20Abi, parseEther, parseUnits } from "viem";
 import {
@@ -29,7 +30,7 @@ import {
   weightRegistryAbi,
 } from "@/lib/contracts";
 import { getLegConfigs, mergeSkipLists } from "@/lib/quote";
-import { getPublicClient } from "@/lib/web3";
+import { explorerTxUrl, getPublicClient } from "@/lib/web3";
 
 export interface StepLeg {
   tokenAddress: string;
@@ -345,14 +346,39 @@ export function DepositStepsModal({
             <StepIcon n={3} status={confirmStatus} />
             <div className="flex flex-1 flex-col gap-1">
               <p className="text-sm font-medium">Confirmation</p>
-              <p className="text-xs text-muted-foreground">
-                {confirmStatus === "done" && tokenIds.length > 0
-                  ? `Position NFTs: ${tokenIds.join(", ")}`
-                  : "Status shows here after you sign."}
-              </p>
+              {confirmStatus === "done" && tokenIds.length > 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Position NFTs:{" "}
+                  {tokenIds.map((id, i) => (
+                    <span key={id}>
+                      {i > 0 && ", "}
+                      <Link
+                        href={`https://app.uniswap.org/positions/v4/robinhood/${id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium tabular-nums text-primary hover:underline"
+                      >
+                        #{id}
+                      </Link>
+                    </span>
+                  ))}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Status shows here after you sign.
+                </p>
+              )}
               {confirmStatus === "done" && deposit.data && (
                 <p className="font-mono text-xs text-muted-foreground">
-                  {`${deposit.data.slice(0, 10)}…${deposit.data.slice(-4)}`}
+                  Tx{" "}
+                  <Link
+                    href={explorerTxUrl(deposit.data)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {`${deposit.data.slice(0, 10)}…${deposit.data.slice(-4)}`}
+                  </Link>
                 </p>
               )}
             </div>
