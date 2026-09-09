@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { hoursSince, truncateAddress } from "@/lib/subgraph";
+import { explorerAddressUrl, explorerTxUrl } from "@/lib/web3";
 
 interface DepositTx {
   user: string;
@@ -111,10 +112,24 @@ export function RecentTransactions({ indexId }: { indexId: string }) {
               {rows.map((tx) => (
                 <TableRow key={tx.transactionHash}>
                   <TableCell className="font-mono text-xs">
-                    {truncateAddress(tx.transactionHash)}
+                    <a
+                      href={explorerTxUrl(tx.transactionHash)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {truncateAddress(tx.transactionHash)}
+                    </a>
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    {truncateAddress(tx.user)}
+                    <a
+                      href={explorerAddressUrl(tx.user)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {truncateAddress(tx.user)}
+                    </a>
                   </TableCell>
                   <TableCell className="tabular-nums">{tx.epoch}</TableCell>
                   <TableCell className="tabular-nums">

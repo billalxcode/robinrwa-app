@@ -29,6 +29,7 @@ import {
   hoursSince,
   type LiveIndexDetail,
 } from "@/lib/subgraph";
+import { explorerTxUrl } from "@/lib/web3";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -195,7 +196,14 @@ function LiveBody({
               {latest ? (
                 <>
                   <p className="mt-1 font-mono text-sm">
-                    {`${latest.transactionHash.slice(0, 10)}…${latest.transactionHash.slice(-4)}`}
+                    <a
+                      href={explorerTxUrl(latest.transactionHash)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {`${latest.transactionHash.slice(0, 10)}…${latest.transactionHash.slice(-4)}`}
+                    </a>
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {hoursSince(latest.blockTimestamp)}
