@@ -40,7 +40,8 @@ import {
   positionManagerAbi,
 } from "@/lib/contracts";
 import { decodePositionRange } from "@/lib/positions";
-import { hoursSince } from "@/lib/subgraph";
+import { hoursSince, timeAgo } from "@/lib/subgraph";
+import { explorerTxUrl } from "@/lib/web3";
 
 interface PositionRow {
   id: string;
@@ -48,17 +49,45 @@ interface PositionRow {
   manager: string;
   active: boolean;
   createdAt: string;
+  burnedAt: string | null;
   index: { id: string };
+}
+
+interface UserStatsFull {
+  id: string;
+  totalNetETH: string;
+  totalNetUSDG: string;
+  depositCount: string;
+  filledLegs: string;
+  skippedLegs: string;
+  firstDepositAt: string;
+  lastDepositAt: string;
+}
+
+interface DepositEvent {
+  net: string;
+  tokenIn: string;
+  indexId: string;
+  epoch: string;
+  tokenIds: string[];
+  filledLegs: number;
+  skippedLegs: number;
+  blockTimestamp: string;
+  transactionHash: string;
+}
+
+interface RemoveEvent {
+  tokenIds: string[];
+  blockTimestamp: string;
+  transactionHash: string;
 }
 
 interface PortfolioResponse {
   positions: PositionRow[];
   indexes: { id: string; name: string }[];
-  userStats_collection: {
-    id: string;
-    totalNetETH: string;
-    totalNetUSDG: string;
-  }[];
+  userStats_collection: UserStatsFull[];
+  liquidityAddeds: DepositEvent[];
+  liquidityRemoveds: RemoveEvent[];
 }
 
 const PortfolioQuery = gql`
@@ -74,6 +103,7 @@ const PortfolioQuery = gql`
       manager
       active
       createdAt
+      burnedAt
       index {
         id
       }
@@ -86,6 +116,37 @@ const PortfolioQuery = gql`
       id
       totalNetETH
       totalNetUSDG
+      depositCount
+      filledLegs
+      skippedLegs
+      firstDepositAt
+      lastDepositAt
+    }
+    liquidityAddeds(
+      first: 20
+      orderBy: blockTimestamp
+      orderDirection: desc
+      where: { user: $owner }
+    ) {
+      net
+      tokenIn
+      indexId
+      epoch
+      tokenIds
+      filledLegs
+      skippedLegs
+      blockTimestamp
+      transactionHash
+    }
+    liquidityRemoveds(
+      first: 20
+      orderBy: blockTimestamp
+      orderDirection: desc
+      where: { user: $owner }
+    ) {
+      tokenIds
+      blockTimestamp
+      transactionHash
     }
   }
 `;
@@ -105,6 +166,9 @@ export function PortfolioTable() {
     eth: string;
     usdg: string;
   } | null>(null);
+  const [stats, setStats] = useState<UserStatsFull | null>(null);
+  const [deposits, setDeposits] = useState<DepositEvent[] | null>(null);
+  const [removals, setRemovals] = useState<RemoveEvent[] | null>(null);
   const [selected, setSelected] = useState<PositionRow | null>(null);
   const [reconnectTimedOut, setReconnectTimedOut] = useState(false);
   // Mount gate: AppKit state only exists on the client, so the server
@@ -159,10 +223,18 @@ export function PortfolioTable() {
     return () => clearTimeout(timer);
   }, [status]);
 
+  const closed = (rows ?? []).filter((r) => !r.active || r.burnedAt !== null);
+
+  // Plain per-render computation (≤100 rows): pairs of active NFTs.
+  // poolOf/isBurned are hoisted function declarations below.
+
   useEffect(() => {
     if (!address) {
       setRows(null);
       setDeposited(null);
+      setStats(null);
+      setDeposits(null);
+      setRemovals(null);
       return;
     }
     const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
@@ -178,10 +250,13 @@ export function PortfolioTable() {
         if (!alive) return;
         setRows(data.positions);
         setNames(Object.fromEntries(data.indexes.map((i) => [i.id, i.name])));
-        const stats = data.userStats_collection[0] ?? null;
+        const userStats = data.userStats_collection[0] ?? null;
+        setStats(userStats);
+        setDeposits(data.liquidityAddeds);
+        setRemovals(data.liquidityRemoveds);
         setDeposited(
-          stats
-            ? { eth: stats.totalNetETH, usdg: stats.totalNetUSDG }
+          userStats
+            ? { eth: userStats.totalNetETH, usdg: userStats.totalNetUSDG }
             : { eth: "0", usdg: "0" },
         );
       } catch {
@@ -242,6 +317,27 @@ export function PortfolioTable() {
   const visible = (rows ?? [])
     .map((r, i) => ({ r, i }))
     .filter(({ r, i }) => r.active && !isBurned(i));
+
+  const allocCounts = new Map<string, number>();
+  for (const { i } of visible) {
+    const pool = poolOf(i);
+    if (!pool || pool.burned || !pool.pair) continue;
+    allocCounts.set(pool.pair, (allocCounts.get(pool.pair) ?? 0) + 1);
+  }
+  const allocation = [...allocCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const maxAlloc = Math.max(1, ...allocation.map(([, n]) => n));
+
+  function fmtNet(d: DepositEvent): string {
+    const isUsdg = d.tokenIn.toLowerCase() === USDG_ADDRESS.toLowerCase();
+    const dec = isUsdg ? (usdgDecimals.data ?? 18) : 18;
+    const ticker = isUsdg ? "USDG" : "ETH";
+    try {
+      const v = Number(formatUnits(BigInt(d.net), dec));
+      return `${v.toLocaleString("en-US", { maximumFractionDigits: 4 })} ${ticker}`;
+    } catch {
+      return "—";
+    }
+  }
 
   function poolOf(index: number): {
     pair: string;
@@ -318,6 +414,36 @@ export function PortfolioTable() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">LP NFTs you own</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardDescription>Total Deposits</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {stats === null ? "—" : stats.depositCount}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {stats === null
+                ? "On-chain count"
+                : `First ${timeAgo(stats.firstDepositAt)} · last ${timeAgo(stats.lastDepositAt)}`}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardDescription>Legs Filled</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {stats === null ? "—" : stats.filledLegs}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {stats === null
+                ? "Across all deposits"
+                : `${stats.skippedLegs} skipped (refunded)`}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -402,6 +528,167 @@ export function PortfolioTable() {
                     </TableRow>
                   );
                 })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Allocation by pool</CardTitle>
+          <CardDescription>Active NFTs per pair.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {poolReads.isLoading || poolReads.isFetching ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+          ) : allocation.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No active positions to allocate.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {allocation.map(([pair, n]) => (
+                <div key={pair} className="flex items-center gap-3">
+                  <span className="w-36 truncate text-sm font-medium">
+                    {pair}
+                  </span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${(n / maxAlloc) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-10 text-right text-sm tabular-nums">
+                    {n}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Deposit history</CardTitle>
+          <CardDescription>
+            Latest 20 deposits from this wallet.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {deposits === null ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : deposits.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No deposits yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Age</TableHead>
+                  <TableHead>Index</TableHead>
+                  <TableHead>Net</TableHead>
+                  <TableHead>Legs</TableHead>
+                  <TableHead>Epoch</TableHead>
+                  <TableHead>Tx</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {deposits.map((d) => (
+                  <TableRow key={d.transactionHash}>
+                    <TableCell className="text-muted-foreground">
+                      {timeAgo(d.blockTimestamp)}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {names[d.indexId] ?? `Index ${d.indexId}`}
+                    </TableCell>
+                    <TableCell className="tabular-nums">{fmtNet(d)}</TableCell>
+                    <TableCell className="tabular-nums">
+                      {d.filledLegs}/
+                      {Number(d.filledLegs) + Number(d.skippedLegs)}
+                    </TableCell>
+                    <TableCell className="tabular-nums">{d.epoch}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={explorerTxUrl(d.transactionHash)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-xs text-primary hover:underline"
+                      >
+                        {`${d.transactionHash.slice(0, 10)}…${d.transactionHash.slice(-4)}`}
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Withdrawals</CardTitle>
+          <CardDescription>
+            Closed positions and removals from this wallet.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {removals === null || rows === null ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : removals.length === 0 && closed.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No withdrawals yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Age</TableHead>
+                  <TableHead>NFTs</TableHead>
+                  <TableHead>Tx</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {closed.map((r) => (
+                  <TableRow key={`closed-${r.id}`}>
+                    <TableCell className="text-muted-foreground">
+                      {r.burnedAt ? timeAgo(r.burnedAt) : "—"}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      #{r.tokenId}
+                      <span className="text-muted-foreground"> closed</span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">—</TableCell>
+                  </TableRow>
+                ))}
+                {removals.map((m) => (
+                  <TableRow key={m.transactionHash}>
+                    <TableCell className="text-muted-foreground">
+                      {timeAgo(m.blockTimestamp)}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {m.tokenIds.map((t) => `#${t}`).join(", ")}
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={explorerTxUrl(m.transactionHash)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-xs text-primary hover:underline"
+                      >
+                        {`${m.transactionHash.slice(0, 10)}…${m.transactionHash.slice(-4)}`}
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
