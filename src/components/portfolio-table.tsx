@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -198,11 +197,14 @@ export function PortfolioTable() {
     );
   }
 
-  const active = (rows ?? []).filter((r) => r.active);
+  const visible = (rows ?? [])
+    .map((r, i) => ({ r, i }))
+    .filter(({ r, i }) => r.active && !isBurned(i));
 
   function poolOf(index: number): {
     pair: string;
     range: string;
+    burned: boolean;
   } | null {
     const entry = poolReads.data?.[index];
     if (!entry || entry.status !== "success") return null;
@@ -216,10 +218,26 @@ export function PortfolioTable() {
       },
       bigint,
     ];
+    // Burned NFTs read back as zero storage — the subgraph `active` flag
+    // lags behind, so this on-chain read is the source of truth.
+    if (
+      /^0x0+$/.test(poolKey.currency0.toLowerCase()) &&
+      /^0x0+$/.test(poolKey.currency1.toLowerCase())
+    ) {
+      return { pair: "", range: "", burned: true };
+    }
     const a = assetLabel(getAsset(poolKey.currency0));
     const b = assetLabel(getAsset(poolKey.currency1));
     const { tickLower, tickUpper } = decodePositionRange(info);
-    return { pair: `${a} / ${b}`, range: `${tickLower} → ${tickUpper}` };
+    return {
+      pair: `${a} / ${b}`,
+      range: `${tickLower} → ${tickUpper}`,
+      burned: false,
+    };
+  }
+
+  function isBurned(index: number): boolean {
+    return poolOf(index)?.burned === true;
   }
 
   return (
@@ -229,7 +247,7 @@ export function PortfolioTable() {
           <CardHeader>
             <CardDescription>Active Positions</CardDescription>
             <CardTitle className="text-3xl tabular-nums">
-              {rows === null ? "—" : active.length}
+              {rows === null ? "—" : visible.length}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -249,7 +267,7 @@ export function PortfolioTable() {
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
-          ) : rows.length === 0 ? (
+          ) : visible.length === 0 ? (
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -274,13 +292,12 @@ export function PortfolioTable() {
                   <TableHead>Position NFT</TableHead>
                   <TableHead>Index</TableHead>
                   <TableHead>Pool</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Opened</TableHead>
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((r, i) => {
+                {visible.map(({ r, i }) => {
                   const pool = poolOf(i);
                   return (
                     <TableRow key={r.id}>
@@ -299,29 +316,22 @@ export function PortfolioTable() {
                             </span>
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">…</span>
+                          <span className="text-muted-foreground">
+                            {poolReads.isLoading ? "…" : "—"}
+                          </span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={r.active ? "default" : "secondary"}>
-                          {r.active ? "Active" : "Closed"}
-                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {hoursSince(r.createdAt)}
                       </TableCell>
                       <TableCell>
-                        {r.active ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelected(r)}
-                          >
-                            Remove
-                          </Button>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelected(r)}
+                        >
+                          Remove
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );
