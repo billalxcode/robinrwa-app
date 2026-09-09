@@ -1,12 +1,12 @@
 "use client";
 
-import { useAppKit } from "@reown/appkit/react";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { GraphQLClient, gql } from "graphql-request";
 import { ArrowRight, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { erc20Abi, formatUnits } from "viem";
-import { useAccount, useReadContract, useReadContracts } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,7 +93,11 @@ const PortfolioQuery = gql`
 const REFRESH_MS = 10_000;
 
 export function PortfolioTable() {
-  const { address, isConnected, status } = useAccount();
+  // Connection state comes from AppKit (same source as the header
+  // ConnectButton) — wagmi's useAccount can lag behind AppKit and show
+  // "not connected" while the header shows connected. Reads below only
+  // need the address + adapter RPC, not a wagmi-level connection.
+  const { address, isConnected, status } = useAppKitAccount();
   const { open: openAppKit } = useAppKit();
   const [rows, setRows] = useState<PositionRow[] | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
@@ -103,6 +107,10 @@ export function PortfolioTable() {
   } | null>(null);
   const [selected, setSelected] = useState<PositionRow | null>(null);
   const [reconnectTimedOut, setReconnectTimedOut] = useState(false);
+  // Mount gate: AppKit state only exists on the client, so the server
+  // always renders "disconnected". Hold a neutral skeleton until mount
+  // so the first client render matches SSR (avoids hydration mismatch).
+  const [mounted, setMounted] = useState(false);
 
   const usdgDecimals = useReadContract({
     address: USDG_ADDRESS,
@@ -139,6 +147,10 @@ export function PortfolioTable() {
         managerAddress !== "0x0000000000000000000000000000000000000000",
     },
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setReconnectTimedOut(false);
@@ -185,8 +197,9 @@ export function PortfolioTable() {
   }, [address]);
 
   if (
-    (status === "reconnecting" || status === "connecting") &&
-    !reconnectTimedOut
+    !mounted ||
+    ((status === "reconnecting" || status === "connecting") &&
+      !reconnectTimedOut)
   ) {
     return (
       <Card>
