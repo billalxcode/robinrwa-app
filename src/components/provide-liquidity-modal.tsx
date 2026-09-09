@@ -19,13 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { USDG_ADDRESS } from "@/lib/assets";
+import { getAsset, robinscanLogo, USDG_ADDRESS } from "@/lib/assets";
 import type { MockTokenWeight } from "@/lib/mock";
+import { cn } from "@/lib/utils";
 import { robinhood } from "@/lib/web3";
 
 const FEE_BPS = 20;
@@ -51,6 +50,18 @@ export interface ModalLeg {
   tokenAddress: string;
   quoteAddress: string;
 }
+
+const PAY_TOKENS = ["USDG", "ETH"] as const;
+
+const PAY_META: Record<
+  (typeof PAY_TOKENS)[number],
+  { logo: string; sub: string }
+> = {
+  USDG: { logo: getAsset(USDG_ADDRESS).logo, sub: "Stablecoin" },
+  ETH: { logo: robinscanLogo("ETH", 64), sub: "Native" },
+};
+
+const QUICK_PCTS = [25, 50, 75] as const;
 
 export function ProvideLiquidityModal({
   name,
@@ -115,23 +126,31 @@ export function ProvideLiquidityModal({
     const computedNet = amt - computedFee;
     const active = tokens.filter((t) => !skipped.includes(t.token));
     const total = active.reduce((s, t) => s + t.weightBps, 0);
-    if (total === 0)
-      return {
-        fee: computedFee,
-        net: computedNet,
-        rows: [] as Row[],
-      };
-    let distributed = 0;
-    let top = 0;
-    const computed = active.map((t, i) => {
-      const inflow =
-        Math.floor(((computedNet * t.weightBps) / total) * 1e6) / 1e6;
-      distributed += inflow;
-      if (i === 0 || t.weightBps > active[top].weightBps) top = i;
-      return { token: t.token, inflow, share: t.share };
-    });
-    // Remainder to the largest leg, like _resolveWeights.
-    if (computed.length > 0) computed[top].inflow += computedNet - distributed;
+    // Rows always list every leg (skipped legs keep inflow 0) so the
+    // toggle stays visible and a skipped leg can be re-enabled.
+    const inflows = new Map<string, number>();
+    if (total > 0) {
+      let distributed = 0;
+      let top = 0;
+      active.forEach((t, i) => {
+        const inflow =
+          Math.floor(((computedNet * t.weightBps) / total) * 1e6) / 1e6;
+        distributed += inflow;
+        if (i === 0 || t.weightBps > active[top].weightBps) top = i;
+        inflows.set(t.token, inflow);
+      });
+      // Remainder to the largest leg, like _resolveWeights.
+      if (active.length > 0)
+        inflows.set(
+          active[top].token,
+          (inflows.get(active[top].token) ?? 0) + computedNet - distributed,
+        );
+    }
+    const computed = tokens.map((t) => ({
+      token: t.token,
+      inflow: inflows.get(t.token) ?? 0,
+      share: t.share,
+    }));
     return { fee: computedFee, net: computedNet, rows: computed };
   }, [amt, valid, quoteEligible, skipped, tokens]);
 
@@ -140,11 +159,29 @@ export function ProvideLiquidityModal({
     setAmount(String(Number(balance.toFixed(6))));
   }
 
+  function fillPercent(pct: number) {
+    if (balance === null) return;
+    setAmount(String(Number(((balance * pct) / 100).toFixed(6))));
+  }
+
   function toggleSkip(symbol: string, include: boolean) {
     setSkipped((prev) =>
       include ? prev.filter((s) => s !== symbol) : [...prev, symbol],
     );
   }
+
+  const noneEligible =
+    tokens.length > 0 && tokens.every((t) => skipped.includes(t.token));
+
+  const ctaLabel = !valid
+    ? "Enter an amount"
+    : !quoteEligible
+      ? "USDG only"
+      : insufficient
+        ? `Insufficient ${token} balance`
+        : noneEligible
+          ? "Select at least one leg"
+          : `Review deposit · ${fmt(amt)} ${token}`;
 
   return (
     <Dialog
@@ -160,70 +197,106 @@ export function ProvideLiquidityModal({
       </DialogTrigger>
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Provide liquidity</DialogTitle>
+          <DialogTitle>Deposit into {name}</DialogTitle>
           <DialogDescription>
-            See how your deposit into {name} is split.
+            Split across {tokens.length} legs by oracle weight. Nothing moves
+            until you review and sign.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          <Field>
-            <FieldLabel>Pay with</FieldLabel>
-            <ToggleGroup
-              multiple={false}
-              value={[token]}
-              onValueChange={(v) => {
-                const next = v[0];
-                if (next === "ETH" || next === "USDG") setToken(next);
-              }}
-            >
-              <ToggleGroupItem value="ETH">ETH (native)</ToggleGroupItem>
-              <ToggleGroupItem value="USDG">USDG</ToggleGroupItem>
-            </ToggleGroup>
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="pl-amount">Amount</FieldLabel>
-            <Input
-              id="pl-amount"
-              type="number"
-              min="0"
-              inputMode="decimal"
-              placeholder="0.0"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-              }}
-            />
-            <div className="flex items-center justify-between text-xs">
-              {address ? (
-                <>
-                  <span className="text-muted-foreground">
-                    Balance:{" "}
-                    {balance === null ? (
-                      "…"
-                    ) : (
-                      <span className="tabular-nums">
-                        {fmt(balance)} {token}
-                      </span>
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-secondary p-1">
+            {PAY_TOKENS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                aria-pressed={token === t}
+                onClick={() => setToken(t)}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors",
+                  token === t ? "bg-muted" : "hover:bg-muted/50",
+                )}
+              >
+                <TokenIcon
+                  src={PAY_META[t].logo}
+                  label={t}
+                  className="size-6"
+                />
+                <span className="flex min-w-0 flex-col leading-tight">
+                  <span
+                    className={cn(
+                      "text-sm font-semibold",
+                      token === t ? "text-foreground" : "text-muted-foreground",
                     )}
+                  >
+                    {t}
                   </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {PAY_META[t].sub}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-border bg-secondary p-5">
+            <div className="grid grid-cols-[1fr_auto] items-center gap-x-3">
+              <Input
+                id="pl-amount"
+                type="number"
+                min="0"
+                inputMode="decimal"
+                placeholder="0.0"
+                aria-label="Deposit amount"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                }}
+                className="h-auto w-full border-0 bg-transparent p-0 text-4xl leading-none font-semibold tabular-nums caret-primary shadow-none outline-none focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <span className="flex items-center gap-2 rounded-full bg-muted py-1.5 pr-4 pl-1.5">
+                <TokenIcon
+                  src={PAY_META[token].logo}
+                  label={token}
+                  className="size-6"
+                />
+                <span className="text-sm font-semibold">{token}</span>
+              </span>
+              <div className="mt-4 flex items-center gap-1.5">
+                {QUICK_PCTS.map((pct) => (
                   <button
+                    key={pct}
                     type="button"
                     disabled={balance === null || balance <= 0}
-                    onClick={fillMax}
-                    className="font-medium text-primary hover:underline disabled:opacity-50"
+                    onClick={() => fillPercent(pct)}
+                    className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                   >
-                    Max
+                    {pct}%
                   </button>
-                </>
-              ) : (
-                <span className="text-muted-foreground">
-                  Connect a wallet to see balance.
-                </span>
-              )}
+                ))}
+                <button
+                  type="button"
+                  disabled={balance === null || balance <= 0}
+                  onClick={fillMax}
+                  className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-primary transition-colors hover:underline disabled:opacity-50"
+                >
+                  MAX
+                </button>
+              </div>
+              <p className="mt-4 text-right text-xs text-muted-foreground tabular-nums">
+                {address
+                  ? balance === null
+                    ? "Balance …"
+                    : `Balance ${fmt(balance)}`
+                  : "Connect wallet"}
+              </p>
             </div>
-          </Field>
+            <p className="mt-3 text-xs text-muted-foreground">
+              {valid && quoteEligible
+                ? `≈ ${fmt(net)} net after ${fmt(fee)} fee`
+                : "Type an amount to preview the split."}
+            </p>
+          </div>
 
           {token !== "USDG" && (
             <Alert>
@@ -233,62 +306,72 @@ export function ProvideLiquidityModal({
           )}
 
           {valid && quoteEligible && (
-            <div className="flex flex-col gap-3 rounded-xl border border-border p-4">
+            <div className="flex flex-col gap-4 rounded-xl border border-border p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Fee</span>
+                <span className="text-muted-foreground">You invest</span>
+                <span className="text-base font-semibold tabular-nums">
+                  {fmt(net)} {token}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Protocol fee (20 bps)
+                </span>
                 <span className="tabular-nums">
                   {fmt(fee)} {token}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">You invest</span>
-                <span className="font-medium tabular-nums">
-                  {fmt(net)} {token}
-                </span>
-              </div>
-              {rows.map((r) => {
-                const info = legs?.find((l) => l.token === r.token);
-                return (
-                  <div
-                    key={r.token}
-                    className="flex items-center gap-3 text-sm"
-                  >
-                    {info ? (
-                      <TokenIcon src={info.logo} label={r.token} />
-                    ) : (
-                      <Badge variant="outline" className="w-20 justify-center">
-                        {r.token}
-                      </Badge>
-                    )}
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="flex items-baseline justify-between gap-2">
-                        <span className="font-medium">{r.token}</span>
-                        <span className="tabular-nums">
-                          {fmt(r.inflow)} {token}
+              <Separator />
+              <div className="flex flex-col gap-4">
+                {rows.map((r) => {
+                  const info = legs?.find((l) => l.token === r.token);
+                  const off = skipped.includes(r.token);
+                  const pct =
+                    net > 0 && !off ? Math.min(100, (r.inflow / net) * 100) : 0;
+                  return (
+                    <div key={r.token} className={cn(off && "opacity-50")}>
+                      <div className="flex items-center gap-3">
+                        {info ? (
+                          <TokenIcon src={info.logo} label={r.token} />
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="w-20 justify-center"
+                          >
+                            {r.token}
+                          </Badge>
+                        )}
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="flex items-baseline justify-between gap-2 text-sm">
+                            <span className="font-medium">{r.token}</span>
+                            <span className="tabular-nums">
+                              {fmt(r.inflow)} {token}
+                            </span>
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {info
+                              ? `In ${info.quote} pool · ${(info.fee / 10000).toFixed(2)}% fee · ${r.share}`
+                              : `${r.share} share`}
+                          </span>
                         </span>
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {info
-                          ? `In ${info.quote} pool, ${(info.fee / 10000).toFixed(2)}% fee, ${r.share} share`
-                          : `${r.share} share`}
-                      </span>
-                    </span>
-                    <Label
-                      htmlFor={`skip-${r.token}`}
-                      className="text-xs text-muted-foreground"
-                    >
-                      {skipped.includes(r.token) ? "Skipped" : "Include"}
-                    </Label>
-                    <Switch
-                      id={`skip-${r.token}`}
-                      checked={!skipped.includes(r.token)}
-                      onCheckedChange={(include) =>
-                        toggleSkip(r.token, include)
-                      }
-                    />
-                  </div>
-                );
-              })}
+                        <Switch
+                          aria-label={`${off ? "Include" : "Skip"} ${r.token}`}
+                          checked={!off}
+                          onCheckedChange={(include) =>
+                            toggleSkip(r.token, include)
+                          }
+                        />
+                      </div>
+                      <div className="mt-2 ml-8 h-1 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary transition-[width]"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Skipped legs are refunded automatically.
               </p>
@@ -301,18 +384,19 @@ export function ProvideLiquidityModal({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-2">
           <DialogClose render={<Button variant="secondary" />}>
             Cancel
           </DialogClose>
           <Button
+            className="flex-1"
             disabled={!valid || !quoteEligible || insufficient}
             onClick={() => {
               setOpen(false);
               setShowSteps(true);
             }}
           >
-            Deposit {valid ? `${fmt(amt)} ${token}` : ""}
+            {ctaLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

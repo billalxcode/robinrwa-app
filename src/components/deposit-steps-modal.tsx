@@ -42,7 +42,12 @@ export interface StepLeg {
 type StepStatus = "loading" | "action" | "locked" | "done" | "error";
 
 function StepIcon({ n, status }: { n: number; status: StepStatus }) {
-  if (status === "loading") return <Spinner className="size-5" />;
+  if (status === "loading")
+    return (
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Spinner className="size-4" />
+      </span>
+    );
   if (status === "done")
     return (
       <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
