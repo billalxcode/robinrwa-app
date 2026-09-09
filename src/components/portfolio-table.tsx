@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { erc20Abi, formatUnits } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
+import { TokenIcon } from "@/components/token-icon";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,7 +41,6 @@ import {
   indexRouterAbi,
   positionManagerAbi,
 } from "@/lib/contracts";
-import { decodePositionRange } from "@/lib/positions";
 import { hoursSince, timeAgo } from "@/lib/subgraph";
 import { explorerTxUrl } from "@/lib/web3";
 
@@ -341,12 +342,13 @@ export function PortfolioTable() {
 
   function poolOf(index: number): {
     pair: string;
-    range: string;
+    logos: { src: string; label: string }[];
+    fee: string;
     burned: boolean;
   } | null {
     const entry = poolReads.data?.[index];
     if (!entry || entry.status !== "success") return null;
-    const [poolKey, info] = entry.result as [
+    const [poolKey] = entry.result as [
       {
         currency0: string;
         currency1: string;
@@ -362,14 +364,17 @@ export function PortfolioTable() {
       /^0x0+$/.test(poolKey.currency0.toLowerCase()) &&
       /^0x0+$/.test(poolKey.currency1.toLowerCase())
     ) {
-      return { pair: "", range: "", burned: true };
+      return { pair: "", logos: [], fee: "", burned: true };
     }
-    const a = assetLabel(getAsset(poolKey.currency0));
-    const b = assetLabel(getAsset(poolKey.currency1));
-    const { tickLower, tickUpper } = decodePositionRange(info);
+    const assetA = getAsset(poolKey.currency0);
+    const assetB = getAsset(poolKey.currency1);
     return {
-      pair: `${a} / ${b}`,
-      range: `${tickLower} → ${tickUpper}`,
+      pair: `${assetLabel(assetA)} / ${assetLabel(assetB)}`,
+      logos: [
+        { src: assetA.logo, label: assetLabel(assetA) },
+        { src: assetB.logo, label: assetLabel(assetB) },
+      ],
+      fee: `${(poolKey.fee / 10000).toFixed(2)}%`,
       burned: false,
     };
   }
@@ -501,10 +506,23 @@ export function PortfolioTable() {
                       </TableCell>
                       <TableCell>
                         {pool ? (
-                          <span className="flex min-w-0 flex-col">
-                            <span className="font-medium">{pool.pair}</span>
-                            <span className="text-xs tabular-nums text-muted-foreground">
-                              {pool.range}
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            <span className="flex shrink-0 items-center">
+                              <TokenIcon
+                                src={pool.logos[0].src}
+                                label={pool.logos[0].label}
+                              />
+                              <TokenIcon
+                                src={pool.logos[1].src}
+                                label={pool.logos[1].label}
+                                className="-ml-1.5 ring-2 ring-card"
+                              />
+                            </span>
+                            <span className="flex min-w-0 flex-col gap-1">
+                              <span className="font-medium">{pool.pair}</span>
+                              <span>
+                                <Badge variant="outline">{pool.fee} fee</Badge>
+                              </span>
                             </span>
                           </span>
                         ) : (
