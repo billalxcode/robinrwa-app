@@ -387,7 +387,7 @@ export function DepositStepsModal({
 
         <DialogFooter>
           <Button variant="secondary" onClick={onBack}>
-            Back
+            {depositReceipt.isSuccess ? "Close" : "Back"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { USDG_ADDRESS } from "@/lib/assets";
-import { hoursSince, truncateAddress } from "@/lib/subgraph";
+import { timeAgo, truncateAddress } from "@/lib/subgraph";
 import { explorerAddressUrl, explorerTxUrl } from "@/lib/web3";
 
 interface DepositTx {
@@ -179,7 +179,7 @@ export function RecentTransactions({ indexId }: { indexId: string }) {
                     {tx.filledLegs}/{tx.filledLegs + tx.skippedLegs}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {hoursSince(tx.blockTimestamp)}
+                    {timeAgo(tx.blockTimestamp)}
                   </TableCell>
                 </TableRow>
               ))}
