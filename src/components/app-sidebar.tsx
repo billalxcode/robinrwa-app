@@ -3,11 +3,11 @@
 import {
   Activity,
   BookOpenText,
+  Briefcase,
   ChartLine,
   House,
   Layers,
   type LucideIcon,
-  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,7 +36,7 @@ interface NavItem {
 const mainNav: NavItem[] = [
   { title: "Home", url: "/", icon: House },
   { title: "Index", url: "/indexes", icon: ChartLine },
-  { title: "Positions", url: "/positions", icon: Wallet },
+  { title: "Portfolio", url: "/portfolio", icon: Briefcase },
 ];
 
 // Resources group: supporting pages (contract docs + oracle status).

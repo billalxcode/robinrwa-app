@@ -54,6 +54,19 @@ export const indexRouterAbi = [
     stateMutability: "nonpayable",
   },
   {
+    type: "function",
+    name: "removeLiquidity",
+    inputs: [
+      { name: "tokenIds", type: "uint256[]" },
+      { name: "amount0Min", type: "uint256[]" },
+      { name: "amount1Min", type: "uint256[]" },
+      { name: "data", type: "bytes[]" },
+      { name: "deadline", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
     type: "event",
     name: "LiquidityAdded",
     inputs: [
@@ -82,6 +95,13 @@ export const indexRouterAbi = [
   {
     type: "function",
     name: "poolManager",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "positionManager",
     inputs: [],
     outputs: [{ name: "", type: "address" }],
     stateMutability: "view",
@@ -121,6 +141,30 @@ export const poolManagerAbi = [
       { name: "tick", type: "int24" },
       { name: "protocolFee", type: "uint24" },
       { name: "lpFee", type: "uint24" },
+    ],
+    stateMutability: "view",
+  },
+] as const;
+
+// Dok: /uniswap/v4-periphery — PositionManager.getPoolAndPositionInfo.
+export const positionManagerAbi = [
+  {
+    type: "function",
+    name: "getPoolAndPositionInfo",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [
+      {
+        name: "poolKey",
+        type: "tuple",
+        components: [
+          { name: "currency0", type: "address" },
+          { name: "currency1", type: "address" },
+          { name: "fee", type: "uint24" },
+          { name: "tickSpacing", type: "int24" },
+          { name: "hooks", type: "address" },
+        ],
+      },
+      { name: "info", type: "uint256" },
     ],
     stateMutability: "view",
   },
