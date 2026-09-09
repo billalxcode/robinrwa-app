@@ -252,7 +252,7 @@ export function ProvideLiquidityModal({
                 onChange={(e) => {
                   setAmount(e.target.value);
                 }}
-                className="h-auto w-full border-0 bg-transparent p-0 text-4xl leading-none font-semibold tabular-nums caret-primary shadow-none outline-none focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="h-auto w-full rounded-0 border-0 bg-transparent p-0 text-4xl leading-none font-semibold tabular-nums caret-primary shadow-none outline-none focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
               <span className="flex items-center gap-2 rounded-full bg-muted py-1.5 pr-4 pl-1.5">
                 <TokenIcon
@@ -390,7 +390,7 @@ export function ProvideLiquidityModal({
           </DialogClose>
           <Button
             className="flex-1"
-            disabled={!valid || !quoteEligible || insufficient}
+            disabled={!valid || !quoteEligible || insufficient || noneEligible}
             onClick={() => {
               setOpen(false);
               setShowSteps(true);
