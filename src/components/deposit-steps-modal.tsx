@@ -30,7 +30,7 @@ import {
   weightRegistryAbi,
 } from "@/lib/contracts";
 import { getLegConfigs, mergeSkipLists } from "@/lib/quote";
-import { explorerTxUrl, getPublicClient } from "@/lib/web3";
+import { explorerTxUrl, getPublicClient, uniswapPositionUrl } from "@/lib/web3";
 
 export interface StepLeg {
   tokenAddress: string;
@@ -353,7 +353,7 @@ export function DepositStepsModal({
                     <span key={id}>
                       {i > 0 && ", "}
                       <Link
-                        href={`https://app.uniswap.org/positions/v4/robinhood/${id}`}
+                        href={uniswapPositionUrl(id)}
                         target="_blank"
                         rel="noreferrer"
                         className="font-medium tabular-nums text-primary hover:underline"

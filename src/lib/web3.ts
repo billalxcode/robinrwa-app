@@ -34,6 +34,11 @@ export function explorerTxUrl(hash: string): string {
   return `${ROBINHOOD_EXPLORER_URL}/tx/${hash}`;
 }
 
+// Uniswap web app position page (chain slug "robinhood", v4).
+export function uniswapPositionUrl(tokenId: string | number | bigint): string {
+  return `https://app.uniswap.org/positions/v4/robinhood/${String(tokenId)}`;
+}
+
 // Robinhood Chain mainnet (EVM, chainId 4663). Shape per Context7
 // Dok: /reown-com/reown-docs — custom networks via defineChain.
 export const robinhood = defineChain({

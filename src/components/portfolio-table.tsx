@@ -42,7 +42,7 @@ import {
   positionManagerAbi,
 } from "@/lib/contracts";
 import { hoursSince, timeAgo } from "@/lib/subgraph";
-import { explorerTxUrl } from "@/lib/web3";
+import { explorerTxUrl, uniswapPositionUrl } from "@/lib/web3";
 
 interface PositionRow {
   id: string;
@@ -499,10 +499,22 @@ export function PortfolioTable() {
                   return (
                     <TableRow key={r.id}>
                       <TableCell className="tabular-nums">
-                        #{r.tokenId}
+                        <Link
+                          href={uniswapPositionUrl(r.tokenId)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          #{r.tokenId}
+                        </Link>
                       </TableCell>
                       <TableCell className="font-medium text-primary">
-                        {names[r.index.id] ?? `Index ${r.index.id}`}
+                        <Link
+                          href={`/indexes/${r.index.id}`}
+                          className="hover:underline"
+                        >
+                          {names[r.index.id] ?? `Index ${r.index.id}`}
+                        </Link>
                       </TableCell>
                       <TableCell>
                         {pool ? (
@@ -624,7 +636,12 @@ export function PortfolioTable() {
                       {timeAgo(d.blockTimestamp)}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {names[d.indexId] ?? `Index ${d.indexId}`}
+                      <Link
+                        href={`/indexes/${d.indexId}`}
+                        className="text-primary hover:underline"
+                      >
+                        {names[d.indexId] ?? `Index ${d.indexId}`}
+                      </Link>
                     </TableCell>
                     <TableCell className="tabular-nums">{fmtNet(d)}</TableCell>
                     <TableCell className="tabular-nums">
@@ -681,7 +698,14 @@ export function PortfolioTable() {
                       {r.burnedAt ? timeAgo(r.burnedAt) : "—"}
                     </TableCell>
                     <TableCell className="tabular-nums">
-                      #{r.tokenId}
+                      <Link
+                        href={uniswapPositionUrl(r.tokenId)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        #{r.tokenId}
+                      </Link>
                       <span className="text-muted-foreground"> closed</span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">—</TableCell>
@@ -693,7 +717,19 @@ export function PortfolioTable() {
                       {timeAgo(m.blockTimestamp)}
                     </TableCell>
                     <TableCell className="tabular-nums">
-                      {m.tokenIds.map((t) => `#${t}`).join(", ")}
+                      {m.tokenIds.map((t, j) => (
+                        <span key={t}>
+                          {j > 0 && ", "}
+                          <Link
+                            href={uniswapPositionUrl(t)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            #{t}
+                          </Link>
+                        </span>
+                      ))}
                     </TableCell>
                     <TableCell>
                       <Link
