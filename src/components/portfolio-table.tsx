@@ -5,6 +5,7 @@ import { GraphQLClient, gql } from "graphql-request";
 import { ArrowRight, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { assetLabel, getAsset } from "@/lib/assets";
+import { assetLabel, getAsset, USDG_ADDRESS } from "@/lib/assets";
 import {
   INDEX_ROUTER,
   indexRouterAbi,
@@ -53,6 +54,11 @@ interface PositionRow {
 interface PortfolioResponse {
   positions: PositionRow[];
   indexes: { id: string; name: string }[];
+  userStats_collection: {
+    id: string;
+    totalNetETH: string;
+    totalNetUSDG: string;
+  }[];
 }
 
 const PortfolioQuery = gql`
@@ -76,6 +82,11 @@ const PortfolioQuery = gql`
       id
       name
     }
+    userStats_collection(where: { id: $owner }) {
+      id
+      totalNetETH
+      totalNetUSDG
+    }
   }
 `;
 
@@ -86,8 +97,19 @@ export function PortfolioTable() {
   const { open: openAppKit } = useAppKit();
   const [rows, setRows] = useState<PositionRow[] | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [deposited, setDeposited] = useState<{
+    eth: string;
+    usdg: string;
+  } | null>(null);
   const [selected, setSelected] = useState<PositionRow | null>(null);
   const [reconnectTimedOut, setReconnectTimedOut] = useState(false);
+
+  const usdgDecimals = useReadContract({
+    address: USDG_ADDRESS,
+    abi: erc20Abi,
+    functionName: "decimals",
+    query: { enabled: !!address },
+  });
 
   // Subgraph leaves Position.manager unset (zero address) — resolve the
   // real PositionManager from the router once, use it for every position.
@@ -128,6 +150,7 @@ export function PortfolioTable() {
   useEffect(() => {
     if (!address) {
       setRows(null);
+      setDeposited(null);
       return;
     }
     const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
@@ -143,6 +166,12 @@ export function PortfolioTable() {
         if (!alive) return;
         setRows(data.positions);
         setNames(Object.fromEntries(data.indexes.map((i) => [i.id, i.name])));
+        const stats = data.userStats_collection[0] ?? null;
+        setDeposited(
+          stats
+            ? { eth: stats.totalNetETH, usdg: stats.totalNetUSDG }
+            : { eth: "0", usdg: "0" },
+        );
       } catch {
         // Keep stale rows on transient failures.
       }
@@ -243,6 +272,30 @@ export function PortfolioTable() {
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardDescription>Portfolio Value</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {deposited === null || usdgDecimals.data === undefined
+                ? "—"
+                : `${Number(
+                    formatUnits(BigInt(deposited.usdg), usdgDecimals.data),
+                  ).toLocaleString("en-US", {
+                    maximumFractionDigits: 2,
+                  })} USDG`}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Net deposited on-chain
+              {deposited !== null &&
+              deposited.eth !== "0" &&
+              usdgDecimals.data !== undefined
+                ? ` (+${Number(formatUnits(BigInt(deposited.eth), 18)).toLocaleString("en-US", { maximumFractionDigits: 4 })} ETH)`
+                : ""}
+            </p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardDescription>Active Positions</CardDescription>

@@ -277,3 +277,47 @@ export async function getOverviewLive(): Promise<{
     return null;
   }
 }
+
+export interface IndexDayPoint {
+  day: string;
+  volumeETH: string;
+  volumeUSDG: string;
+  depositCount: string;
+}
+
+const IndexVolumeQuery = gql`
+  query IndexVolume($index: String!, $first: Int!) {
+    indexDaySnapshots(
+      first: $first
+      orderBy: day
+      orderDirection: asc
+      where: { index: $index }
+    ) {
+      day
+      volumeETH
+      volumeUSDG
+      depositCount
+    }
+  }
+`;
+
+interface IndexVolumeResponse {
+  indexDaySnapshots: IndexDayPoint[];
+}
+
+export async function getIndexVolume(
+  indexId: string,
+  first = 30,
+): Promise<IndexDayPoint[] | null> {
+  const client = getClient();
+  if (!client) return null;
+  try {
+    const data = await client.request<IndexVolumeResponse>(IndexVolumeQuery, {
+      index: indexId,
+      first,
+    });
+    return data.indexDaySnapshots;
+  } catch {
+    return null;
+  }
+}

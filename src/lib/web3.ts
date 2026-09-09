@@ -1,6 +1,7 @@
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { defineChain } from "@reown/appkit/networks";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, erc20Abi, http } from "viem";
+import { USDG_ADDRESS } from "@/lib/assets";
 
 // Public identifiers as constants; private/endpoint values come from .env.
 export const REOWN_PROJECT_ID =
@@ -58,6 +59,24 @@ export function getPublicClient() {
     chain: robinhood,
     transport: http(ROBINHOOD_RPC_URL),
   });
+}
+
+let usdgDecimalsCache: number | null = null;
+
+// USDG decimals read on-chain (never assumed — stablecoins vary).
+export async function getUsdgDecimals(): Promise<number | null> {
+  if (usdgDecimalsCache !== null) return usdgDecimalsCache;
+  try {
+    const decimals = await getPublicClient().readContract({
+      address: USDG_ADDRESS,
+      abi: erc20Abi,
+      functionName: "decimals",
+    });
+    usdgDecimalsCache = decimals;
+    return decimals;
+  } catch {
+    return null;
+  }
 }
 
 export const web3Metadata = {

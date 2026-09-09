@@ -19,17 +19,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { VolumeChart, type VolumePoint } from "@/components/volume-chart";
 import { assetLabel, getAsset } from "@/lib/assets";
 import { weightMap } from "@/lib/index-rows";
 import { getMockIndex, type MockIndex } from "@/lib/mock";
 import {
   formatDate,
   getIndexDetailLive,
+  getIndexVolume,
   getOracleStatus,
   hoursSince,
   type LiveIndexDetail,
 } from "@/lib/subgraph";
-import { explorerTxUrl } from "@/lib/web3";
+import { explorerTxUrl, getUsdgDecimals } from "@/lib/web3";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -62,20 +64,38 @@ function StatCard({
   );
 }
 
+function dayToDate(day: string): string {
+  const d = new Date(Number(day) * 86400 * 1000);
+  const month = `${d.getUTCMonth() + 1}`.padStart(2, "0");
+  const date = `${d.getUTCDate()}`.padStart(2, "0");
+  return `${d.getUTCFullYear()}-${month}-${date}`;
+}
+
 export default async function IndexDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [live, oracle] = await Promise.all([
+  const [live, oracle, snapshots, usdgDecimals] = await Promise.all([
     getIndexDetailLive(id),
     getOracleStatus(),
+    getIndexVolume(id),
+    getUsdgDecimals(),
   ]);
   if (live) {
     const weights = weightMap(oracle?.tokens ?? []);
     const epoch = oracle?.stats.epoch ?? null;
-    return <LiveBody data={live} weights={weights} epoch={epoch} />;
+    const volume: VolumePoint[] =
+      usdgDecimals === null
+        ? []
+        : (snapshots ?? []).map((s) => ({
+            time: dayToDate(s.day),
+            value: Number(BigInt(s.volumeUSDG)) / 10 ** (usdgDecimals ?? 0),
+          }));
+    return (
+      <LiveBody data={live} weights={weights} epoch={epoch} volume={volume} />
+    );
   }
   const index = getMockIndex(id);
   if (!index) notFound();
@@ -86,10 +106,12 @@ function LiveBody({
   data,
   weights,
   epoch,
+  volume,
 }: {
   data: LiveIndexDetail;
   weights: Map<string, number>;
   epoch: string | null;
+  volume: VolumePoint[];
 }) {
   const { index, legs, deposits } = data;
   const legRows = legs.map((leg) => {
@@ -297,6 +319,22 @@ function LiveBody({
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Volume</CardTitle>
+          <CardDescription>Daily deposit volume, USDG.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {volume.length >= 2 ? (
+            <VolumeChart data={volume} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Not enough history yet.
+            </p>
+          )}
         </CardContent>
       </Card>
 
