@@ -172,7 +172,7 @@ export async function getIndexesLive(): Promise<LiveIndexList | null> {
 }
 
 const IndexDetailQuery = gql`
-  query IndexDetail($id: ID!) {
+  query IndexDetail($id: ID!, $indexId: BigInt!) {
     index(id: $id) {
       id
       name
