@@ -1,5 +1,4 @@
 import { assetLabel, getAsset } from "@/lib/assets";
-import { getMockIndex, mockIndexes } from "@/lib/mock";
 import type { SubgraphIndex } from "@/lib/subgraph";
 
 export interface IndexRow {
@@ -40,16 +39,3 @@ export function buildLiveRows(
     status: idx.exists ? "Active" : "Inactive",
   }));
 }
-
-export function buildMockRows(): IndexRow[] {
-  return mockIndexes.map((idx) => ({
-    id: idx.id,
-    name: idx.name,
-    tickers: idx.constituents,
-    topWeight: idx.topWeight,
-    epoch: String(idx.epoch),
-    status: idx.status,
-  }));
-}
-
-export { getMockIndex };

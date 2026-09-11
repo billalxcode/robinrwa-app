@@ -23,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { getAsset, robinscanLogo, USDG_ADDRESS } from "@/lib/assets";
-import type { MockTokenWeight } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { robinhood } from "@/lib/web3";
 
@@ -39,8 +38,14 @@ function fmt(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 6 });
 }
 
+export interface ModalToken {
+  token: string;
+  weightBps: number;
+  share: string;
+}
+
 export interface ModalLeg {
-  /** Matches MockTokenWeight.token label. */
+  /** Matches ModalToken.token label. */
   token: string;
   quote: string;
   fee: number;
@@ -70,7 +75,7 @@ export function ProvideLiquidityModal({
   indexId,
 }: {
   name: string;
-  tokens: MockTokenWeight[];
+  tokens: ModalToken[];
   legs?: ModalLeg[];
   /** On-chain index id. Null = demo index, steps modal stays read-only. */
   indexId?: string | null;

@@ -1,3 +1,4 @@
+import { ChartLine } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,6 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
   Table,
   TableBody,
   TableCell,
@@ -15,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buildLiveRows, buildMockRows } from "@/lib/index-rows";
+import { buildLiveRows } from "@/lib/index-rows";
 import { getIndexesLive, getOracleStatus } from "@/lib/subgraph";
 
 export default async function IndexesPage() {
@@ -23,13 +31,40 @@ export default async function IndexesPage() {
     getIndexesLive(),
     getOracleStatus(),
   ]);
-  const live = list !== null && oracle !== null;
+  if (list === null || oracle === null) {
+    return (
+      <>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-5xl font-bold tracking-tight">
+              Index
+            </h1>
+            <Badge variant="secondary">Unavailable</Badge>
+          </div>
+          <p className="mt-2 text-muted-foreground">
+            One deposit per index, split by global volume weight.
+          </p>
+        </div>
+
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChartLine />
+            </EmptyMedia>
+            <EmptyTitle>Data unavailable</EmptyTitle>
+            <EmptyDescription>
+              The subgraph is unreachable. Try again later.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </>
+    );
+  }
+
   const weights = new Map(
-    (oracle?.tokens ?? []).map((t) => [t.id.toLowerCase(), t.weightBps]),
+    oracle.tokens.map((t) => [t.id.toLowerCase(), t.weightBps]),
   );
-  const rows = live
-    ? buildLiveRows(list.indexes, weights, oracle.stats.epoch)
-    : buildMockRows();
+  const rows = buildLiveRows(list.indexes, weights, oracle.stats.epoch);
 
   return (
     <>
@@ -38,9 +73,7 @@ export default async function IndexesPage() {
           <h1 className="font-heading text-5xl font-bold tracking-tight">
             Index
           </h1>
-          <Badge variant={live ? "default" : "secondary"}>
-            {live ? "Live" : "Sample"}
-          </Badge>
+          <Badge variant="default">Live</Badge>
         </div>
         <p className="mt-2 text-muted-foreground">
           One deposit per index, split by global volume weight.
@@ -50,58 +83,70 @@ export default async function IndexesPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Indexes</CardTitle>
-          <CardDescription>
-            {live ? "On-chain." : "Sample data."}
-          </CardDescription>
+          <CardDescription>On-chain.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Index</TableHead>
-                <TableHead>Constituents</TableHead>
-                <TableHead>Top Weight</TableHead>
-                <TableHead>Epoch</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-medium text-primary">
-                    <Link
-                      href={`/indexes/${row.id}`}
-                      className="hover:underline"
-                    >
-                      {row.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <span className="flex flex-wrap gap-1.5">
-                      {row.tickers.map((c) => (
-                        <Badge key={c} variant="outline">
-                          {c}
-                        </Badge>
-                      ))}
-                    </span>
-                  </TableCell>
-                  <TableCell className="tabular-nums">
-                    {row.topWeight}
-                  </TableCell>
-                  <TableCell className="tabular-nums">{row.epoch}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        row.status === "Active" ? "default" : "secondary"
-                      }
-                    >
-                      {row.status}
-                    </Badge>
-                  </TableCell>
+          {rows.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ChartLine />
+                </EmptyMedia>
+                <EmptyTitle>No indexes yet</EmptyTitle>
+                <EmptyDescription>
+                  No index has been created on-chain.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Index</TableHead>
+                  <TableHead>Constituents</TableHead>
+                  <TableHead>Top Weight</TableHead>
+                  <TableHead>Epoch</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-medium text-primary">
+                      <Link
+                        href={`/indexes/${row.id}`}
+                        className="hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex flex-wrap gap-1.5">
+                        {row.tickers.map((c) => (
+                          <Badge key={c} variant="outline">
+                            {c}
+                          </Badge>
+                        ))}
+                      </span>
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {row.topWeight}
+                    </TableCell>
+                    <TableCell className="tabular-nums">{row.epoch}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          row.status === "Active" ? "default" : "secondary"
+                        }
+                      >
+                        {row.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </>

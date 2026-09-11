@@ -1,7 +1,7 @@
 import { GraphQLClient, gql } from "graphql-request";
 
 // Subgraph endpoint (The Graph). Empty/unreachable → callers fall back
-// to mock data. Dok: /graphprotocol/docs — querying from an application.
+// to empty/error states. Dok: /graphprotocol/docs — querying from an application.
 export const SUBGRAPH_URL = process.env.NEXT_PUBLIC_SUBGRAPH_URL ?? "";
 
 function getClient(): GraphQLClient | null {

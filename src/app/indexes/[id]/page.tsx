@@ -1,3 +1,4 @@
+import { ChartLine } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ProvideLiquidityModal } from "@/components/provide-liquidity-modal";
 import { RecentTransactions } from "@/components/recent-transactions";
@@ -10,6 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -22,10 +30,10 @@ import {
 import { VolumeChart, type VolumePoint } from "@/components/volume-chart";
 import { assetLabel, getAsset } from "@/lib/assets";
 import { weightMap } from "@/lib/index-rows";
-import { getMockIndex, type MockIndex } from "@/lib/mock";
 import {
   formatDate,
   getIndexDetailLive,
+  getIndexesLive,
   getIndexVolume,
   getOracleStatus,
   hoursSince,
@@ -97,9 +105,35 @@ export default async function IndexDetailPage({
       <LiveBody data={live} weights={weights} epoch={epoch} volume={volume} />
     );
   }
-  const index = getMockIndex(id);
-  if (!index) notFound();
-  return <MockBody index={index} />;
+  // Detail missing: subgraph down (error state) vs unknown id (404).
+  const list = await getIndexesLive();
+  if (list === null) {
+    return (
+      <>
+        <div>
+          <h1 className="font-heading text-5xl font-bold tracking-tight">
+            Index
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Index detail from on-chain data.
+          </p>
+        </div>
+
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChartLine />
+            </EmptyMedia>
+            <EmptyTitle>Data unavailable</EmptyTitle>
+            <EmptyDescription>
+              The subgraph is unreachable. Try again later.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </>
+    );
+  }
+  notFound();
 }
 
 function LiveBody({
@@ -339,149 +373,6 @@ function LiveBody({
       </Card>
 
       <RecentTransactions indexId={index.id} />
-    </>
-  );
-}
-
-function MockBody({ index }: { index: MockIndex }) {
-  return (
-    <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-heading text-5xl font-bold tracking-tight">
-              {index.name}
-            </h1>
-            <Badge
-              variant={index.status === "Active" ? "default" : "secondary"}
-            >
-              {index.status}
-            </Badge>
-            <Badge variant="outline">{index.symbol}</Badge>
-          </div>
-          <p className="mt-2 text-muted-foreground">{index.description}</p>
-        </div>
-        <ProvideLiquidityModal name={index.name} tokens={index.tokens} />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "TVL", value: index.tvl, note: "Liquidity in all legs" },
-          {
-            label: "24h Volume",
-            value: index.volume24h,
-            note: "Swap volume, last 24 hours",
-          },
-          {
-            label: "30d Volume",
-            value: index.volume30d,
-            note: "Swap volume, last 30 days",
-          },
-          {
-            label: "APY",
-            value: index.apy,
-            note: "LP fees, trailing 30 days",
-          },
-        ].map((s) => (
-          <Card key={s.label}>
-            <CardHeader>
-              <CardDescription>{s.label}</CardDescription>
-              <CardTitle className="text-3xl tabular-nums">{s.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{s.note}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Index Information</CardTitle>
-            <CardDescription>Sample data.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <InfoRow label="Created By" value={index.createdBy} />
-            <Separator />
-            <InfoRow label="Network" value={index.network} />
-            <Separator />
-            <InfoRow label="Protocol" value={index.protocol} />
-            <Separator />
-            <InfoRow label="Distributor Fee" value={index.fee} />
-            <Separator />
-            <InfoRow label="Epoch" value={String(index.epoch)} />
-            <Separator />
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Last Transaction
-              </p>
-              <p className="mt-1 font-mono text-sm">
-                {`${index.lastTxHash.slice(0, 10)}…${index.lastTxHash.slice(-4)}`}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {index.lastTxTime}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Weight Distribution</CardTitle>
-            <CardDescription>Total 10,000 bps.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {index.tokens.map((t) => (
-              <div key={t.token} className="flex items-center gap-3">
-                <Badge variant="outline" className="w-20 justify-center">
-                  {t.token}
-                </Badge>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{ width: `${t.weightBps / 100}%` }}
-                  />
-                </div>
-                <span className="w-14 text-right text-sm tabular-nums">
-                  {t.share}
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tokens in This Index</CardTitle>
-          <CardDescription>{index.network}.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Token</TableHead>
-                <TableHead>Weight (bps)</TableHead>
-                <TableHead>Share</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {index.tokens.map((t) => (
-                <TableRow key={t.token}>
-                  <TableCell>
-                    <Badge variant="outline">{t.token}</Badge>
-                  </TableCell>
-                  <TableCell className="tabular-nums">
-                    {t.weightBps.toLocaleString("en-US")}
-                  </TableCell>
-                  <TableCell className="tabular-nums">{t.share}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </>
   );
 }
