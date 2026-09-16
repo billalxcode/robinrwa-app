@@ -2,6 +2,7 @@ import { Activity, ArrowRight, ChartLine } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { MarketHydrator } from "@/components/market-hydrator";
+import { Reveal } from "@/components/reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -116,7 +117,7 @@ export default async function Home() {
   return (
     <>
       <MarketHydrator indexes={list} oracle={oracle} />
-      <div className="flex flex-col items-center gap-6 py-8 text-center md:py-16">
+      <Reveal className="flex flex-col items-center gap-6 py-8 text-center md:py-16">
         <Badge
           variant={unavailable || rows.length === 0 ? "secondary" : "default"}
         >
@@ -158,60 +159,66 @@ export default async function Home() {
           sizes="(max-width: 1200px) 100vw, 1200px"
           className="h-auto w-full rounded-xl border border-border"
         />
-      </div>
+      </Reveal>
 
       {featured && (
-        <Card className="rounded-xl">
-          <CardHeader>
-            <CardDescription>Featured index</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {featured.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-1.5">
-                {featured.tickers.map((c) => (
-                  <Badge key={c} variant="outline">
-                    {c}
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Top weight{" "}
-                <span className="font-medium tabular-nums text-foreground">
-                  {featured.topWeight}
-                </span>{" "}
-                for epoch {featured.epoch}
-              </p>
-              <Button
-                variant="outline"
-                nativeButton={false}
-                render={<Link href={`/indexes/${featured.id}`} />}
-              >
-                Open index
-                <ArrowRight data-icon="inline-end" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} className="rounded-xl">
+        <Reveal delay={0.05}>
+          <Card className="rounded-xl">
             <CardHeader>
-              <CardDescription>{s.label}</CardDescription>
-              <CardTitle className="text-3xl tabular-nums">{s.value}</CardTitle>
+              <CardDescription>Featured index</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {featured.name}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{s.note}</p>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap gap-1.5">
+                  {featured.tickers.map((c) => (
+                    <Badge key={c} variant="outline">
+                      {c}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Top weight{" "}
+                  <span className="font-medium tabular-nums text-foreground">
+                    {featured.topWeight}
+                  </span>{" "}
+                  for epoch {featured.epoch}
+                </p>
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={`/indexes/${featured.id}`} />}
+                >
+                  Open index
+                  <ArrowRight data-icon="inline-end" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        </Reveal>
+      )}
 
-      <div>
+      <Reveal>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {stats.map((s) => (
+            <Card key={s.label} className="rounded-xl">
+              <CardHeader>
+                <CardDescription>{s.label}</CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {s.value}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{s.note}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Reveal>
+
+      <Reveal>
         <h2 className="font-heading text-2xl font-bold">How it works</h2>
         <p className="mt-2 text-muted-foreground">
           Three steps from deposit to weighted positions.
@@ -240,133 +247,139 @@ export default async function Home() {
             </Card>
           ))}
         </div>
-      </div>
+      </Reveal>
 
-      <Card className="rounded-xl">
-        <CardHeader>
-          <CardTitle>Top Weights</CardTitle>
-          <CardDescription>
-            {unavailable
-              ? "Subgraph unavailable."
-              : `Oracle epoch ${epoch ?? "—"}.`}{" "}
-            <Link href="/oracle" className="text-primary hover:underline">
-              View oracle
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {topTokens.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Activity />
-                </EmptyMedia>
-                <EmptyTitle>No weights yet</EmptyTitle>
-                <EmptyDescription>
-                  {unavailable
-                    ? "The subgraph is unreachable."
-                    : "The oracle has not pushed any weights."}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {topTokens.map((t) => (
-                <div key={t.ticker} className="flex items-center gap-4">
-                  <Badge variant="outline" className="w-20 justify-center">
-                    {t.ticker}
-                  </Badge>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${(t.bps / maxBps) * 100}%` }}
-                    />
+      <Reveal>
+        <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle>Top Weights</CardTitle>
+            <CardDescription>
+              {unavailable
+                ? "Subgraph unavailable."
+                : `Oracle epoch ${epoch ?? "—"}.`}{" "}
+              <Link href="/oracle" className="text-primary hover:underline">
+                View oracle
+              </Link>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {topTokens.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Activity />
+                  </EmptyMedia>
+                  <EmptyTitle>No weights yet</EmptyTitle>
+                  <EmptyDescription>
+                    {unavailable
+                      ? "The subgraph is unreachable."
+                      : "The oracle has not pushed any weights."}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {topTokens.map((t) => (
+                  <div key={t.ticker} className="flex items-center gap-4">
+                    <Badge variant="outline" className="w-20 justify-center">
+                      {t.ticker}
+                    </Badge>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(t.bps / maxBps) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-14 text-right text-sm font-medium tabular-nums">
+                      {t.share}
+                    </span>
                   </div>
-                  <span className="w-14 text-right text-sm font-medium tabular-nums">
-                    {t.share}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-xl">
-        <CardHeader>
-          <CardTitle>Registered Indexes</CardTitle>
-          <CardDescription>
-            {unavailable ? "Subgraph unavailable." : "On-chain."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {rows.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ChartLine />
-                </EmptyMedia>
-                <EmptyTitle>No indexes yet</EmptyTitle>
-                <EmptyDescription>
-                  {unavailable
-                    ? "The subgraph is unreachable."
-                    : "No index has been created on-chain."}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Index</TableHead>
-                  <TableHead>Constituents</TableHead>
-                  <TableHead>Top Weight</TableHead>
-                  <TableHead>Epoch</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-medium text-primary">
-                      <Link
-                        href={`/indexes/${row.id}`}
-                        className="hover:underline"
-                      >
-                        {row.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <span className="flex flex-wrap gap-1.5">
-                        {row.tickers.map((c) => (
-                          <Badge key={c} variant="outline">
-                            {c}
-                          </Badge>
-                        ))}
-                      </span>
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {row.topWeight}
-                    </TableCell>
-                    <TableCell className="tabular-nums">{row.epoch}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          row.status === "Active" ? "default" : "secondary"
-                        }
-                      >
-                        {row.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
 
-      <div className="flex flex-col items-center gap-6 py-8 text-center md:py-12">
+      <Reveal>
+        <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle>Registered Indexes</CardTitle>
+            <CardDescription>
+              {unavailable ? "Subgraph unavailable." : "On-chain."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {rows.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ChartLine />
+                  </EmptyMedia>
+                  <EmptyTitle>No indexes yet</EmptyTitle>
+                  <EmptyDescription>
+                    {unavailable
+                      ? "The subgraph is unreachable."
+                      : "No index has been created on-chain."}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Index</TableHead>
+                    <TableHead>Constituents</TableHead>
+                    <TableHead>Top Weight</TableHead>
+                    <TableHead>Epoch</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="font-medium text-primary">
+                        <Link
+                          href={`/indexes/${row.id}`}
+                          className="hover:underline"
+                        >
+                          {row.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex flex-wrap gap-1.5">
+                          {row.tickers.map((c) => (
+                            <Badge key={c} variant="outline">
+                              {c}
+                            </Badge>
+                          ))}
+                        </span>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {row.topWeight}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {row.epoch}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            row.status === "Active" ? "default" : "secondary"
+                          }
+                        >
+                          {row.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
+
+      <Reveal className="flex flex-col items-center gap-6 py-8 text-center md:py-12">
         <Image
           src="/assets/New%20Branding/Artboard%204-cta.jpg"
           alt="One Deposit. Infinite Diversification."
@@ -399,7 +412,7 @@ export default async function Home() {
           RWA tokens and liquidity positions carry market, smart-contract, and
           oracle risks, including possible loss of principal.
         </p>
-      </div>
+      </Reveal>
     </>
   );
 }

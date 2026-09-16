@@ -1,6 +1,7 @@
 import { ChartLine } from "lucide-react";
 import Link from "next/link";
 import { MarketHydrator } from "@/components/market-hydrator";
+import { Reveal } from "@/components/reveal";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -34,7 +35,7 @@ export default async function IndexesPage() {
   ]);
   if (list === null || oracle === null) {
     return (
-      <>
+      <Reveal>
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-heading text-5xl font-bold tracking-tight">
@@ -58,7 +59,7 @@ export default async function IndexesPage() {
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
-      </>
+      </Reveal>
     );
   }
 
@@ -70,87 +71,93 @@ export default async function IndexesPage() {
   return (
     <>
       <MarketHydrator indexes={list} oracle={oracle} />
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-5xl font-bold tracking-tight">
-            Index
-          </h1>
-          <Badge variant="default">Live</Badge>
+      <Reveal>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-5xl font-bold tracking-tight">
+              Index
+            </h1>
+            <Badge variant="default">Live</Badge>
+          </div>
+          <p className="mt-2 text-muted-foreground">
+            One deposit per index, split by global volume weight.
+          </p>
         </div>
-        <p className="mt-2 text-muted-foreground">
-          One deposit per index, split by global volume weight.
-        </p>
-      </div>
+      </Reveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Indexes</CardTitle>
-          <CardDescription>On-chain.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {rows.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ChartLine />
-                </EmptyMedia>
-                <EmptyTitle>No indexes yet</EmptyTitle>
-                <EmptyDescription>
-                  No index has been created on-chain.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Index</TableHead>
-                  <TableHead>Constituents</TableHead>
-                  <TableHead>Top Weight</TableHead>
-                  <TableHead>Epoch</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-medium text-primary">
-                      <Link
-                        href={`/indexes/${row.id}`}
-                        className="hover:underline"
-                      >
-                        {row.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <span className="flex flex-wrap gap-1.5">
-                        {row.tickers.map((c) => (
-                          <Badge key={c} variant="outline">
-                            {c}
-                          </Badge>
-                        ))}
-                      </span>
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {row.topWeight}
-                    </TableCell>
-                    <TableCell className="tabular-nums">{row.epoch}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          row.status === "Active" ? "default" : "secondary"
-                        }
-                      >
-                        {row.status}
-                      </Badge>
-                    </TableCell>
+      <Reveal delay={0.05}>
+        <Card>
+          <CardHeader>
+            <CardTitle>All Indexes</CardTitle>
+            <CardDescription>On-chain.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {rows.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ChartLine />
+                  </EmptyMedia>
+                  <EmptyTitle>No indexes yet</EmptyTitle>
+                  <EmptyDescription>
+                    No index has been created on-chain.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Index</TableHead>
+                    <TableHead>Constituents</TableHead>
+                    <TableHead>Top Weight</TableHead>
+                    <TableHead>Epoch</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="font-medium text-primary">
+                        <Link
+                          href={`/indexes/${row.id}`}
+                          className="hover:underline"
+                        >
+                          {row.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex flex-wrap gap-1.5">
+                          {row.tickers.map((c) => (
+                            <Badge key={c} variant="outline">
+                              {c}
+                            </Badge>
+                          ))}
+                        </span>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {row.topWeight}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {row.epoch}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            row.status === "Active" ? "default" : "secondary"
+                          }
+                        >
+                          {row.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
     </>
   );
 }

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { erc20Abi, formatUnits } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
+import { Reveal } from "@/components/reveal";
 import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -134,40 +135,44 @@ export function PortfolioTable() {
       !reconnectTimedOut)
   ) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Positions</CardTitle>
-          <CardDescription>Reconnecting wallet…</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Positions</CardTitle>
+            <CardDescription>Reconnecting wallet…</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </Reveal>
     );
   }
 
   if (!isConnected || !address) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <Wallet />
-          </EmptyMedia>
-          <EmptyTitle>Wallet not connected</EmptyTitle>
-          <EmptyDescription>
-            Connect a wallet to see your positions.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={() => openAppKit()}>
-            Connect wallet
-            <ArrowRight data-icon="inline-end" />
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <Reveal>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Wallet />
+            </EmptyMedia>
+            <EmptyTitle>Wallet not connected</EmptyTitle>
+            <EmptyDescription>
+              Connect a wallet to see your positions.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => openAppKit()}>
+              Connect wallet
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+          </EmptyContent>
+        </Empty>
+      </Reveal>
     );
   }
 
@@ -241,119 +246,336 @@ export function PortfolioTable() {
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardDescription>Portfolio Value</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {deposited === null || usdgDecimals.data === undefined
-                ? "—"
-                : `${Number(
-                    formatUnits(BigInt(deposited.usdg), usdgDecimals.data),
-                  ).toLocaleString("en-US", {
-                    maximumFractionDigits: 2,
-                  })} USDG`}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Net deposited on-chain
-              {deposited !== null &&
-              deposited.eth !== "0" &&
-              usdgDecimals.data !== undefined
-                ? ` (+${Number(formatUnits(BigInt(deposited.eth), 18)).toLocaleString("en-US", { maximumFractionDigits: 4 })} ETH)`
-                : ""}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Active Positions</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {rows === null ? "—" : visible.length}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">LP NFTs you own</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Total Deposits</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {stats === null ? "—" : stats.depositCount}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {stats === null
-                ? "On-chain count"
-                : `First ${timeAgo(stats.firstDepositAt)} and last ${timeAgo(stats.lastDepositAt)}`}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Legs Filled</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {stats === null ? "—" : stats.filledLegs}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {stats === null
-                ? "Across all deposits"
-                : `${stats.skippedLegs} skipped (refunded)`}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Reveal delay={0.05}>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <Card>
+            <CardHeader>
+              <CardDescription>Portfolio Value</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {deposited === null || usdgDecimals.data === undefined
+                  ? "—"
+                  : `${Number(
+                      formatUnits(BigInt(deposited.usdg), usdgDecimals.data),
+                    ).toLocaleString("en-US", {
+                      maximumFractionDigits: 2,
+                    })} USDG`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Net deposited on-chain
+                {deposited !== null &&
+                deposited.eth !== "0" &&
+                usdgDecimals.data !== undefined
+                  ? ` (+${Number(formatUnits(BigInt(deposited.eth), 18)).toLocaleString("en-US", { maximumFractionDigits: 4 })} ETH)`
+                  : ""}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Active Positions</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {rows === null ? "—" : visible.length}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">LP NFTs you own</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Total Deposits</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {stats === null ? "—" : stats.depositCount}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                {stats === null
+                  ? "On-chain count"
+                  : `First ${timeAgo(stats.firstDepositAt)} and last ${timeAgo(stats.lastDepositAt)}`}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Legs Filled</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {stats === null ? "—" : stats.filledLegs}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                {stats === null
+                  ? "Across all deposits"
+                  : `${stats.skippedLegs} skipped (refunded)`}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </Reveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Positions</CardTitle>
-          <CardDescription>Updates every 10 seconds.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {rows === null ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : visible.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Wallet />
-                </EmptyMedia>
-                <EmptyTitle>No positions yet</EmptyTitle>
-                <EmptyDescription>
-                  Make one deposit to open positions.
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <Button nativeButton={false} render={<Link href="/indexes" />}>
-                  Explore Indexes
-                  <ArrowRight data-icon="inline-end" />
-                </Button>
-              </EmptyContent>
-            </Empty>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Position NFT</TableHead>
-                  <TableHead>Index</TableHead>
-                  <TableHead>Pool</TableHead>
-                  <TableHead>Opened</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visible.map(({ r, i }) => {
-                  const pool = poolOf(i);
-                  return (
-                    <TableRow key={r.id}>
+      <Reveal delay={0.05}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Positions</CardTitle>
+            <CardDescription>Updates every 10 seconds.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {rows === null ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : visible.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Wallet />
+                  </EmptyMedia>
+                  <EmptyTitle>No positions yet</EmptyTitle>
+                  <EmptyDescription>
+                    Make one deposit to open positions.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button
+                    nativeButton={false}
+                    render={<Link href="/indexes" />}
+                  >
+                    Explore Indexes
+                    <ArrowRight data-icon="inline-end" />
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Position NFT</TableHead>
+                    <TableHead>Index</TableHead>
+                    <TableHead>Pool</TableHead>
+                    <TableHead>Opened</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map(({ r, i }) => {
+                    const pool = poolOf(i);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="tabular-nums">
+                          <Link
+                            href={uniswapPositionUrl(r.tokenId)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            #{r.tokenId}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="font-medium text-primary">
+                          <Link
+                            href={`/indexes/${r.index.id}`}
+                            className="hover:underline"
+                          >
+                            {names[r.index.id] ?? `Index ${r.index.id}`}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          {pool ? (
+                            <span className="flex min-w-0 items-center gap-2.5">
+                              <span className="flex shrink-0 items-center">
+                                <TokenIcon
+                                  src={pool.logos[0].src}
+                                  label={pool.logos[0].label}
+                                />
+                                <TokenIcon
+                                  src={pool.logos[1].src}
+                                  label={pool.logos[1].label}
+                                  className="-ml-1.5 ring-2 ring-card"
+                                />
+                              </span>
+                              <span className="flex min-w-0 flex-col gap-1">
+                                <span className="font-medium">{pool.pair}</span>
+                                <span>
+                                  <Badge variant="outline">
+                                    {pool.fee} fee
+                                  </Badge>
+                                </span>
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {poolReads.isLoading ? "…" : "—"}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {hoursSince(r.createdAt)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelected(r.tokenId)}
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Allocation by pool</CardTitle>
+            <CardDescription>Active NFTs per pair.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {poolReads.isLoading || poolReads.isFetching ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ) : allocation.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No active positions to allocate.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {allocation.map(([pair, n]) => (
+                  <div key={pair} className="flex items-center gap-3">
+                    <span className="w-36 truncate text-sm font-medium">
+                      {pair}
+                    </span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(n / maxAlloc) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-sm tabular-nums">
+                      {n}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Deposit history</CardTitle>
+            <CardDescription>
+              Latest 20 deposits from this wallet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {deposits === null ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : deposits.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No deposits yet.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Age</TableHead>
+                    <TableHead>Index</TableHead>
+                    <TableHead>Net</TableHead>
+                    <TableHead>Legs</TableHead>
+                    <TableHead>Epoch</TableHead>
+                    <TableHead>Tx</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {deposits.map((d) => (
+                    <TableRow key={d.transactionHash}>
+                      <TableCell className="text-muted-foreground">
+                        {timeAgo(d.blockTimestamp)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/indexes/${d.indexId}`}
+                          className="text-primary hover:underline"
+                        >
+                          {names[d.indexId] ?? `Index ${d.indexId}`}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {fmtNet(d)}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {d.filledLegs}/
+                        {Number(d.filledLegs) + Number(d.skippedLegs)}
+                      </TableCell>
+                      <TableCell className="tabular-nums">{d.epoch}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={explorerTxUrl(d.transactionHash)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-xs text-primary hover:underline"
+                        >
+                          {`${d.transactionHash.slice(0, 10)}…${d.transactionHash.slice(-4)}`}
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Withdrawals</CardTitle>
+            <CardDescription>
+              Closed positions and removals from this wallet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {removals === null || rows === null ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : removals.length === 0 && closed.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No withdrawals yet.
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Age</TableHead>
+                    <TableHead>NFTs</TableHead>
+                    <TableHead>Tx</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {closed.map((r) => (
+                    <TableRow key={`closed-${r.id}`}>
+                      <TableCell className="text-muted-foreground">
+                        {r.burnedAt ? timeAgo(r.burnedAt) : "—"}
+                      </TableCell>
                       <TableCell className="tabular-nums">
                         <Link
                           href={uniswapPositionUrl(r.tokenId)}
@@ -363,247 +585,49 @@ export function PortfolioTable() {
                         >
                           #{r.tokenId}
                         </Link>
+                        <span className="text-muted-foreground"> closed</span>
                       </TableCell>
-                      <TableCell className="font-medium text-primary">
+                      <TableCell className="text-muted-foreground">—</TableCell>
+                    </TableRow>
+                  ))}
+                  {removals.map((m) => (
+                    <TableRow key={m.transactionHash}>
+                      <TableCell className="text-muted-foreground">
+                        {timeAgo(m.blockTimestamp)}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {m.tokenIds.map((t, j) => (
+                          <span key={t}>
+                            {j > 0 && ", "}
+                            <Link
+                              href={uniswapPositionUrl(t)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              #{t}
+                            </Link>
+                          </span>
+                        ))}
+                      </TableCell>
+                      <TableCell>
                         <Link
-                          href={`/indexes/${r.index.id}`}
-                          className="hover:underline"
+                          href={explorerTxUrl(m.transactionHash)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-xs text-primary hover:underline"
                         >
-                          {names[r.index.id] ?? `Index ${r.index.id}`}
+                          {`${m.transactionHash.slice(0, 10)}…${m.transactionHash.slice(-4)}`}
                         </Link>
                       </TableCell>
-                      <TableCell>
-                        {pool ? (
-                          <span className="flex min-w-0 items-center gap-2.5">
-                            <span className="flex shrink-0 items-center">
-                              <TokenIcon
-                                src={pool.logos[0].src}
-                                label={pool.logos[0].label}
-                              />
-                              <TokenIcon
-                                src={pool.logos[1].src}
-                                label={pool.logos[1].label}
-                                className="-ml-1.5 ring-2 ring-card"
-                              />
-                            </span>
-                            <span className="flex min-w-0 flex-col gap-1">
-                              <span className="font-medium">{pool.pair}</span>
-                              <span>
-                                <Badge variant="outline">{pool.fee} fee</Badge>
-                              </span>
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">
-                            {poolReads.isLoading ? "…" : "—"}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {hoursSince(r.createdAt)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelected(r.tokenId)}
-                        >
-                          Remove
-                        </Button>
-                      </TableCell>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Allocation by pool</CardTitle>
-          <CardDescription>Active NFTs per pair.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {poolReads.isLoading || poolReads.isFetching ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-6 w-full" />
-              <Skeleton className="h-6 w-full" />
-            </div>
-          ) : allocation.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No active positions to allocate.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {allocation.map(([pair, n]) => (
-                <div key={pair} className="flex items-center gap-3">
-                  <span className="w-36 truncate text-sm font-medium">
-                    {pair}
-                  </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${(n / maxAlloc) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-10 text-right text-sm tabular-nums">
-                    {n}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Deposit history</CardTitle>
-          <CardDescription>
-            Latest 20 deposits from this wallet.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {deposits === null ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : deposits.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No deposits yet.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Age</TableHead>
-                  <TableHead>Index</TableHead>
-                  <TableHead>Net</TableHead>
-                  <TableHead>Legs</TableHead>
-                  <TableHead>Epoch</TableHead>
-                  <TableHead>Tx</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {deposits.map((d) => (
-                  <TableRow key={d.transactionHash}>
-                    <TableCell className="text-muted-foreground">
-                      {timeAgo(d.blockTimestamp)}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <Link
-                        href={`/indexes/${d.indexId}`}
-                        className="text-primary hover:underline"
-                      >
-                        {names[d.indexId] ?? `Index ${d.indexId}`}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="tabular-nums">{fmtNet(d)}</TableCell>
-                    <TableCell className="tabular-nums">
-                      {d.filledLegs}/
-                      {Number(d.filledLegs) + Number(d.skippedLegs)}
-                    </TableCell>
-                    <TableCell className="tabular-nums">{d.epoch}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={explorerTxUrl(d.transactionHash)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono text-xs text-primary hover:underline"
-                      >
-                        {`${d.transactionHash.slice(0, 10)}…${d.transactionHash.slice(-4)}`}
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Withdrawals</CardTitle>
-          <CardDescription>
-            Closed positions and removals from this wallet.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {removals === null || rows === null ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : removals.length === 0 && closed.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No withdrawals yet.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Age</TableHead>
-                  <TableHead>NFTs</TableHead>
-                  <TableHead>Tx</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {closed.map((r) => (
-                  <TableRow key={`closed-${r.id}`}>
-                    <TableCell className="text-muted-foreground">
-                      {r.burnedAt ? timeAgo(r.burnedAt) : "—"}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      <Link
-                        href={uniswapPositionUrl(r.tokenId)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        #{r.tokenId}
-                      </Link>
-                      <span className="text-muted-foreground"> closed</span>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">—</TableCell>
-                  </TableRow>
-                ))}
-                {removals.map((m) => (
-                  <TableRow key={m.transactionHash}>
-                    <TableCell className="text-muted-foreground">
-                      {timeAgo(m.blockTimestamp)}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {m.tokenIds.map((t, j) => (
-                        <span key={t}>
-                          {j > 0 && ", "}
-                          <Link
-                            href={uniswapPositionUrl(t)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            #{t}
-                          </Link>
-                        </span>
-                      ))}
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        href={explorerTxUrl(m.transactionHash)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono text-xs text-primary hover:underline"
-                      >
-                        {`${m.transactionHash.slice(0, 10)}…${m.transactionHash.slice(-4)}`}
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
       <RemovePositionDialog
         key={selected?.tokenId ?? "none"}
         position={

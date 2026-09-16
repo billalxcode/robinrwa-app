@@ -1,5 +1,6 @@
 import { Activity, ExternalLink } from "lucide-react";
 import { MarketHydrator } from "@/components/market-hydrator";
+import { Reveal } from "@/components/reveal";
 import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export default async function OraclePage() {
 
   if (!live) {
     return (
-      <>
+      <Reveal>
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-heading text-5xl font-bold tracking-tight">
@@ -58,7 +59,7 @@ export default async function OraclePage() {
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
-      </>
+      </Reveal>
     );
   }
 
@@ -94,106 +95,118 @@ export default async function OraclePage() {
   return (
     <>
       <MarketHydrator indexes={null} oracle={live} />
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-5xl font-bold tracking-tight">
-            Oracle
-          </h1>
-          <Badge variant="default">Live</Badge>
+      <Reveal>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-5xl font-bold tracking-tight">
+              Oracle
+            </h1>
+            <Badge variant="default">Live</Badge>
+          </div>
+          <p className="mt-2 text-muted-foreground">
+            Weight oracle status and latest push.
+          </p>
         </div>
-        <p className="mt-2 text-muted-foreground">
-          Weight oracle status and latest push.
-        </p>
-      </div>
+      </Reveal>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardHeader>
-              <CardDescription>{s.label}</CardDescription>
-              <CardTitle className="text-3xl tabular-nums">{s.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{s.note}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Reveal delay={0.05}>
+        <div className="grid gap-6 md:grid-cols-3">
+          {stats.map((s) => (
+            <Card key={s.label}>
+              <CardHeader>
+                <CardDescription>{s.label}</CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {s.value}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{s.note}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Reveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Latest Global Weights</CardTitle>
-          <CardDescription>
-            {`On-chain total of ${totalBps.toLocaleString("en-US")} bps`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {rows.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Activity />
-                </EmptyMedia>
-                <EmptyTitle>No weights yet</EmptyTitle>
-                <EmptyDescription>
-                  The oracle has not pushed any weights.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Token</TableHead>
-                  <TableHead>Weight (bps)</TableHead>
-                  <TableHead>Share</TableHead>
-                  <TableHead>Explorer</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((w) => (
-                  <TableRow key={w.key}>
-                    <TableCell>
-                      <span className="flex items-center gap-2">
-                        <TokenIcon src={w.logo} label={w.token} />
-                        <span className="flex min-w-0 flex-col">
-                          <span className="font-medium text-primary">
-                            {w.token}
-                          </span>
-                          {w.name ? (
-                            <span className="max-w-56 truncate text-xs text-muted-foreground">
-                              {w.name}
-                            </span>
-                          ) : null}
-                        </span>
-                      </span>
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {w.weightBps}
-                    </TableCell>
-                    <TableCell className="tabular-nums">{w.share}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        nativeButton={false}
-                        render={
-                          <a href={w.explorer} target="_blank" rel="noreferrer">
-                            <ExternalLink />
-                            <span className="sr-only">
-                              View {w.token} on explorer
-                            </span>
-                          </a>
-                        }
-                      />
-                    </TableCell>
+      <Reveal delay={0.1}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Latest Global Weights</CardTitle>
+            <CardDescription>
+              {`On-chain total of ${totalBps.toLocaleString("en-US")} bps`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {rows.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Activity />
+                  </EmptyMedia>
+                  <EmptyTitle>No weights yet</EmptyTitle>
+                  <EmptyDescription>
+                    The oracle has not pushed any weights.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Token</TableHead>
+                    <TableHead>Weight (bps)</TableHead>
+                    <TableHead>Share</TableHead>
+                    <TableHead>Explorer</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((w) => (
+                    <TableRow key={w.key}>
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <TokenIcon src={w.logo} label={w.token} />
+                          <span className="flex min-w-0 flex-col">
+                            <span className="font-medium text-primary">
+                              {w.token}
+                            </span>
+                            {w.name ? (
+                              <span className="max-w-56 truncate text-xs text-muted-foreground">
+                                {w.name}
+                              </span>
+                            ) : null}
+                          </span>
+                        </span>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {w.weightBps}
+                      </TableCell>
+                      <TableCell className="tabular-nums">{w.share}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          nativeButton={false}
+                          render={
+                            <a
+                              href={w.explorer}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <ExternalLink />
+                              <span className="sr-only">
+                                View {w.token} on explorer
+                              </span>
+                            </a>
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
     </>
   );
 }
