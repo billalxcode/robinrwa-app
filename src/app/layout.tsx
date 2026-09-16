@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppFooter } from "@/components/app-footer";
 import { AppNavbar } from "@/components/app-navbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { WalletSync } from "@/components/wallet-sync";
 import { Web3Provider } from "@/components/web3-provider";
 
 const interSans = Inter({
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full">
         <Web3Provider>
+          <WalletSync />
           <TooltipProvider>
             <div className="flex min-h-svh flex-col">
               <AppNavbar />

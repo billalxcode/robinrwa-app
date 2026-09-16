@@ -1,5 +1,6 @@
 import { Activity, ArrowRight, ChartLine } from "lucide-react";
 import Link from "next/link";
+import { MarketHydrator } from "@/components/market-hydrator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +108,7 @@ export default async function Home() {
 
   return (
     <>
+      <MarketHydrator indexes={list} oracle={oracle} />
       <div className="flex flex-col items-center gap-6 py-8 text-center md:py-16">
         <Badge
           variant={unavailable || rows.length === 0 ? "secondary" : "default"}

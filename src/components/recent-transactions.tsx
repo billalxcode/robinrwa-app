@@ -1,7 +1,6 @@
 "use client";
 
-import { GraphQLClient, gql } from "graphql-request";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { erc20Abi, formatUnits } from "viem";
 import { useReadContract } from "wagmi";
 import {
@@ -23,43 +22,7 @@ import {
 import { USDG_ADDRESS } from "@/lib/assets";
 import { timeAgo, truncateAddress } from "@/lib/subgraph";
 import { explorerAddressUrl, explorerTxUrl } from "@/lib/web3";
-
-interface DepositTx {
-  user: string;
-  epoch: string;
-  tokenIn: string;
-  net: string;
-  tokenIds: string[];
-  filledLegs: number;
-  skippedLegs: number;
-  blockTimestamp: string;
-  transactionHash: string;
-}
-
-interface TxResponse {
-  liquidityAddeds: DepositTx[];
-}
-
-const RecentTxQuery = gql`
-  query RecentDeposits($indexId: BigInt!, $first: Int!) {
-    liquidityAddeds(
-      first: $first
-      orderBy: blockTimestamp
-      orderDirection: desc
-      where: { indexId: $indexId }
-    ) {
-      user
-      epoch
-      tokenIn
-      net
-      tokenIds
-      filledLegs
-      skippedLegs
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
+import { useMarketStore } from "@/stores/market";
 
 function formatAmount(
   net: string,
@@ -91,7 +54,9 @@ function formatAmount(
 const REFRESH_MS = 10_000;
 
 export function RecentTransactions({ indexId }: { indexId: string }) {
-  const [rows, setRows] = useState<DepositTx[] | null>(null);
+  // Shared per-index cache: remounts and tab switches reuse rows while fresh.
+  const rows = useMarketStore((s) => s.recentByIndex[indexId]?.rows ?? null);
+  const fetchRecent = useMarketStore((s) => s.fetchRecent);
   const usdgDecimals = useReadContract({
     address: USDG_ADDRESS,
     abi: erc20Abi,
@@ -99,28 +64,10 @@ export function RecentTransactions({ indexId }: { indexId: string }) {
   });
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
-    if (!url) return;
-    const client = new GraphQLClient(url);
-    let alive = true;
-    async function load() {
-      try {
-        const data = await client.request<TxResponse>(RecentTxQuery, {
-          indexId,
-          first: 10,
-        });
-        if (alive) setRows(data.liquidityAddeds);
-      } catch {
-        // Keep stale rows on transient failures.
-      }
-    }
-    load();
-    const timer = setInterval(load, REFRESH_MS);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-    };
-  }, [indexId]);
+    fetchRecent(indexId);
+    const timer = setInterval(() => fetchRecent(indexId, true), REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [indexId, fetchRecent]);
 
   return (
     <Card>

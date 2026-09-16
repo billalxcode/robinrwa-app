@@ -1,5 +1,6 @@
 import { ChartLine } from "lucide-react";
 import Link from "next/link";
+import { MarketHydrator } from "@/components/market-hydrator";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -68,6 +69,7 @@ export default async function IndexesPage() {
 
   return (
     <>
+      <MarketHydrator indexes={list} oracle={oracle} />
       <div>
         <div className="flex items-center gap-3">
           <h1 className="font-heading text-5xl font-bold tracking-tight">

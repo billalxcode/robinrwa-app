@@ -1,8 +1,9 @@
 "use client";
 
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
+import { useAppKit } from "@reown/appkit/react";
 import { Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useWalletStore } from "@/stores/wallet";
 
 function truncate(address: string): string {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -14,7 +15,8 @@ function truncate(address: string): string {
 // account view when connected.
 export function ConnectButton() {
   const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
+  const address = useWalletStore((s) => s.address);
+  const isConnected = useWalletStore((s) => s.isConnected);
 
   if (!isConnected || !address) {
     return (

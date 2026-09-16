@@ -1,7 +1,6 @@
 "use client";
 
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
-import { GraphQLClient, gql } from "graphql-request";
+import { useAppKit } from "@reown/appkit/react";
 import { ArrowRight, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -43,139 +42,36 @@ import {
 } from "@/lib/contracts";
 import { hoursSince, timeAgo } from "@/lib/subgraph";
 import { explorerTxUrl, uniswapPositionUrl } from "@/lib/web3";
-
-interface PositionRow {
-  id: string;
-  tokenId: string;
-  manager: string;
-  active: boolean;
-  createdAt: string;
-  burnedAt: string | null;
-  index: { id: string };
-}
-
-interface UserStatsFull {
-  id: string;
-  totalNetETH: string;
-  totalNetUSDG: string;
-  depositCount: string;
-  filledLegs: string;
-  skippedLegs: string;
-  firstDepositAt: string;
-  lastDepositAt: string;
-}
-
-interface DepositEvent {
-  net: string;
-  tokenIn: string;
-  indexId: string;
-  epoch: string;
-  tokenIds: string[];
-  filledLegs: number;
-  skippedLegs: number;
-  blockTimestamp: string;
-  transactionHash: string;
-}
-
-interface RemoveEvent {
-  tokenIds: string[];
-  blockTimestamp: string;
-  transactionHash: string;
-}
-
-interface PortfolioResponse {
-  positions: PositionRow[];
-  indexes: { id: string; name: string }[];
-  userStats_collection: UserStatsFull[];
-  liquidityAddeds: DepositEvent[];
-  liquidityRemoveds: RemoveEvent[];
-}
-
-const PortfolioQuery = gql`
-  query UserPortfolio($owner: Bytes!) {
-    positions(
-      first: 100
-      orderBy: tokenId
-      orderDirection: desc
-      where: { owner: $owner }
-    ) {
-      id
-      tokenId
-      manager
-      active
-      createdAt
-      burnedAt
-      index {
-        id
-      }
-    }
-    indexes(first: 50) {
-      id
-      name
-    }
-    userStats_collection(where: { id: $owner }) {
-      id
-      totalNetETH
-      totalNetUSDG
-      depositCount
-      filledLegs
-      skippedLegs
-      firstDepositAt
-      lastDepositAt
-    }
-    liquidityAddeds(
-      first: 20
-      orderBy: blockTimestamp
-      orderDirection: desc
-      where: { user: $owner }
-    ) {
-      net
-      tokenIn
-      indexId
-      epoch
-      tokenIds
-      filledLegs
-      skippedLegs
-      blockTimestamp
-      transactionHash
-    }
-    liquidityRemoveds(
-      first: 20
-      orderBy: blockTimestamp
-      orderDirection: desc
-      where: { user: $owner }
-    ) {
-      tokenIds
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
+import type { DepositEvent } from "@/stores/portfolio";
+import { usePortfolioStore } from "@/stores/portfolio";
+import { useWalletStore } from "@/stores/wallet";
 
 const REFRESH_MS = 10_000;
 
 export function PortfolioTable() {
-  // Connection state comes from AppKit (same source as the header
-  // ConnectButton) — wagmi's useAccount can lag behind AppKit and show
-  // "not connected" while the header shows connected. Reads below only
-  // need the address + adapter RPC, not a wagmi-level connection.
-  const { address, isConnected, status } = useAppKitAccount();
+  // Connection state from the wallet store (synced once from AppKit by
+  // <WalletSync/>) — never read useAppKitAccount/useAccount directly here.
+  const address = useWalletStore((s) => s.address);
+  const isConnected = useWalletStore((s) => s.isConnected);
+  const status = useWalletStore((s) => s.status);
+  const mounted = useWalletStore((s) => s.mounted);
   const { open: openAppKit } = useAppKit();
-  const [rows, setRows] = useState<PositionRow[] | null>(null);
-  const [names, setNames] = useState<Record<string, string>>({});
-  const [deposited, setDeposited] = useState<{
-    eth: string;
-    usdg: string;
-  } | null>(null);
-  const [stats, setStats] = useState<UserStatsFull | null>(null);
-  const [deposits, setDeposits] = useState<DepositEvent[] | null>(null);
-  const [removals, setRemovals] = useState<RemoveEvent[] | null>(null);
-  const [selected, setSelected] = useState<PositionRow | null>(null);
+  // Portfolio cache from the store: shared per wallet, no refetch on
+  // remount while fresh.
+  const cache = usePortfolioStore((s) =>
+    address ? s.byOwner[address.toLowerCase()] : undefined,
+  );
+  const fetchPortfolio = usePortfolioStore((s) => s.fetchPortfolio);
+  const selectedTokenId = usePortfolioStore((s) => s.selectedTokenId);
+  const setSelected = usePortfolioStore((s) => s.setSelected);
+  const rows = cache?.rows ?? null;
+  const names = cache?.names ?? {};
+  const deposited = cache?.deposited ?? null;
+  const stats = cache?.stats ?? null;
+  const deposits = cache?.deposits ?? null;
+  const removals = cache?.removals ?? null;
+  const selected = rows?.find((r) => r.tokenId === selectedTokenId) ?? null;
   const [reconnectTimedOut, setReconnectTimedOut] = useState(false);
-  // Mount gate: AppKit state only exists on the client, so the server
-  // always renders "disconnected". Hold a neutral skeleton until mount
-  // so the first client render matches SSR (avoids hydration mismatch).
-  const [mounted, setMounted] = useState(false);
 
   const usdgDecimals = useReadContract({
     address: USDG_ADDRESS,
@@ -214,8 +110,11 @@ export function PortfolioTable() {
   });
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!address) return;
+    fetchPortfolio(address);
+    const timer = setInterval(() => fetchPortfolio(address, true), REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [address, fetchPortfolio]);
 
   useEffect(() => {
     setReconnectTimedOut(false);
@@ -228,49 +127,6 @@ export function PortfolioTable() {
 
   // Plain per-render computation (≤100 rows): pairs of active NFTs.
   // poolOf/isBurned are hoisted function declarations below.
-
-  useEffect(() => {
-    if (!address) {
-      setRows(null);
-      setDeposited(null);
-      setStats(null);
-      setDeposits(null);
-      setRemovals(null);
-      return;
-    }
-    const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
-    if (!url) return;
-    const client = new GraphQLClient(url);
-    const owner = address.toLowerCase();
-    let alive = true;
-    async function load() {
-      try {
-        const data = await client.request<PortfolioResponse>(PortfolioQuery, {
-          owner,
-        });
-        if (!alive) return;
-        setRows(data.positions);
-        setNames(Object.fromEntries(data.indexes.map((i) => [i.id, i.name])));
-        const userStats = data.userStats_collection[0] ?? null;
-        setStats(userStats);
-        setDeposits(data.liquidityAddeds);
-        setRemovals(data.liquidityRemoveds);
-        setDeposited(
-          userStats
-            ? { eth: userStats.totalNetETH, usdg: userStats.totalNetUSDG }
-            : { eth: "0", usdg: "0" },
-        );
-      } catch {
-        // Keep stale rows on transient failures.
-      }
-    }
-    load();
-    const timer = setInterval(load, REFRESH_MS);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-    };
-  }, [address]);
 
   if (
     !mounted ||
@@ -550,7 +406,7 @@ export function PortfolioTable() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setSelected(r)}
+                          onClick={() => setSelected(r.tokenId)}
                         >
                           Remove
                         </Button>
