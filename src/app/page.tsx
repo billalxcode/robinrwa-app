@@ -121,12 +121,12 @@ export default async function Home() {
           variant={unavailable || rows.length === 0 ? "secondary" : "default"}
         >
           <span className="size-1.5 rounded-full bg-primary" />
-          RWA Index on Robinhood Chain ·{" "}
+          RWA Index on Robinhood Chain{" "}
           {unavailable
-            ? "Subgraph unavailable"
+            ? "(Subgraph unavailable)"
             : rows.length === 0
-              ? "No indexes yet"
-              : `Epoch ${epoch}`}
+              ? "(No indexes yet)"
+              : `(Epoch ${epoch})`}
         </Badge>
         <h1 className="max-w-3xl font-heading text-5xl font-bold">
           One Deposit. <span className="text-primary">Weighted RWA</span>{" "}
@@ -182,7 +182,7 @@ export default async function Home() {
                 <span className="font-medium tabular-nums text-foreground">
                   {featured.topWeight}
                 </span>{" "}
-                · Epoch {featured.epoch}
+                for epoch {featured.epoch}
               </p>
               <Button
                 variant="outline"

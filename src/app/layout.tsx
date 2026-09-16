@@ -29,7 +29,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Index Pool · eIndex Dashboard",
+  title: "Index Pool | eIndex Dashboard",
   description: "RWA index dashboard: explore indexes, manage LP positions.",
 };
 

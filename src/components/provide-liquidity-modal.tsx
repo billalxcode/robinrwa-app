@@ -186,7 +186,7 @@ export function ProvideLiquidityModal({
         ? `Insufficient ${token} balance`
         : noneEligible
           ? "Select at least one leg"
-          : `Review deposit · ${fmt(amt)} ${token}`;
+          : `Review ${fmt(amt)} ${token} deposit`;
 
   return (
     <Dialog
@@ -355,7 +355,7 @@ export function ProvideLiquidityModal({
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {info
-                              ? `In ${info.quote} pool · ${(info.fee / 10000).toFixed(2)}% fee · ${r.share}`
+                              ? `In ${info.quote} pool, ${(info.fee / 10000).toFixed(2)}% fee, ${r.share} share`
                               : `${r.share} share`}
                           </span>
                         </span>

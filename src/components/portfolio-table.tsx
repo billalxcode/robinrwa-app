@@ -288,7 +288,7 @@ export function PortfolioTable() {
             <p className="text-sm text-muted-foreground">
               {stats === null
                 ? "On-chain count"
-                : `First ${timeAgo(stats.firstDepositAt)} · last ${timeAgo(stats.lastDepositAt)}`}
+                : `First ${timeAgo(stats.firstDepositAt)} and last ${timeAgo(stats.lastDepositAt)}`}
             </p>
           </CardContent>
         </Card>
