@@ -49,80 +49,80 @@
 }
 
 :root {
-  --background: #100f0f;
-  --foreground: #ffffff;
-  --card: #1a1919;
-  --card-foreground: #ffffff;
-  --popover: #1f1e1e;
-  --popover-foreground: #ffffff;
-  --primary: #ccff00;
-  --primary-foreground: #201d1d;
-  --secondary: #1f1e1e;
-  --secondary-foreground: #ffffff;
-  --muted: #2a2828;
-  --muted-foreground: #8f8e8e;
-  --accent: #2a2828;
-  --accent-foreground: #ffffff;
-  --destructive: #ff773d;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #55a7fb;
-  --chart-1: #ccff00;
-  --chart-2: #66c399;
-  --chart-3: #55a7fb;
-  --chart-4: #d2a022;
-  --chart-5: #8f8e8e;
+  --background: #f4f1ea;
+  --foreground: #2a2a29;
+  --card: #ffffff;
+  --card-foreground: #2a2a29;
+  --popover: #ffffff;
+  --popover-foreground: #2a2a29;
+  --primary: #af7a4e;
+  --primary-foreground: #ffffff;
+  --secondary: #e8d6a4;
+  --secondary-foreground: #2a2a29;
+  --muted: #d6cec3;
+  --muted-foreground: #6b6259;
+  --accent: #c2a778;
+  --accent-foreground: #2a2a29;
+  --destructive: #b3261e;
+  --border: rgba(42, 42, 41, 0.14);
+  --input: rgba(42, 42, 41, 0.2);
+  --ring: #af7a4e;
+  --chart-1: #af7a4e;
+  --chart-2: #c5a85a;
+  --chart-3: #2e3f51;
+  --chart-4: #c2a778;
+  --chart-5: #542b15;
   --radius: 0.75rem;
-  --sidebar: #100f0f;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ccff00;
-  --sidebar-primary-foreground: #201d1d;
-  --sidebar-accent: #1f1e1e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #55a7fb;
+  --sidebar: #f4f1ea;
+  --sidebar-foreground: #2a2a29;
+  --sidebar-primary: #af7a4e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8d6a4;
+  --sidebar-accent-foreground: #2a2a29;
+  --sidebar-border: rgba(42, 42, 41, 0.14);
+  --sidebar-ring: #af7a4e;
   --font-sans:
-    "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
-  --font-display: "Louize", Georgia, "Times New Roman", serif;
+  --font-display: "Michroma", Georgia, "Times New Roman", serif;
 }
 
 .dark {
-  --background: #100f0f;
-  --foreground: #ffffff;
-  --card: #1a1919;
-  --card-foreground: #ffffff;
-  --popover: #1f1e1e;
-  --popover-foreground: #ffffff;
-  --primary: #ccff00;
-  --primary-foreground: #201d1d;
-  --secondary: #1f1e1e;
-  --secondary-foreground: #ffffff;
-  --muted: #2a2828;
-  --muted-foreground: #8f8e8e;
-  --accent: #2a2828;
-  --accent-foreground: #ffffff;
-  --destructive: #ff773d;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #55a7fb;
-  --chart-1: #ccff00;
-  --chart-2: #66c399;
-  --chart-3: #55a7fb;
-  --chart-4: #d2a022;
-  --chart-5: #8f8e8e;
-  --sidebar: #100f0f;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ccff00;
-  --sidebar-primary-foreground: #201d1d;
-  --sidebar-accent: #1f1e1e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #55a7fb;
+  --background: #2a2a29;
+  --foreground: #f4f1ea;
+  --card: #211f1d;
+  --card-foreground: #f4f1ea;
+  --popover: #211f1d;
+  --popover-foreground: #f4f1ea;
+  --primary: #c2a778;
+  --primary-foreground: #2a2a29;
+  --secondary: #542b15;
+  --secondary-foreground: #f4f1ea;
+  --muted: #3a3632;
+  --muted-foreground: #c9c0b2;
+  --accent: #542b15;
+  --accent-foreground: #f4f1ea;
+  --destructive: #e0655a;
+  --border: rgba(244, 241, 234, 0.14);
+  --input: rgba(244, 241, 234, 0.2);
+  --ring: #c2a778;
+  --chart-1: #c2a778;
+  --chart-2: #c5a85a;
+  --chart-3: #8fa3b8;
+  --chart-4: #af7a4e;
+  --chart-5: #6b6259;
+  --sidebar: #2a2a29;
+  --sidebar-foreground: #f4f1ea;
+  --sidebar-primary: #c2a778;
+  --sidebar-primary-foreground: #2a2a29;
+  --sidebar-accent: #542b15;
+  --sidebar-accent-foreground: #f4f1ea;
+  --sidebar-border: rgba(244, 241, 234, 0.14);
+  --sidebar-ring: #c2a778;
   --font-sans:
-    "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
-  --font-display: "Louize", Georgia, "Times New Roman", serif;
+  --font-display: "Michroma", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -140,8 +140,8 @@
     font-family: var(--font-display);
   }
   ::selection {
-    background: #ccff00;
-    color: #201d1d;
+    background: #af7a4e;
+    color: #ffffff;
   }
   :focus-visible {
     outline: 2px solid var(--ring);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@/components/connect-button";
@@ -20,14 +20,18 @@ export function AppNavbar() {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-background">
       <div className="mx-auto flex h-20 w-full max-w-[1200px] items-center justify-between gap-6 px-6 md:px-10">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Layers className="size-4" />
-          </span>
-          <span className="flex flex-col gap-1 leading-none">
-            <span className="font-semibold text-foreground">RobinRWA</span>
-            <span className="text-xs text-muted-foreground">eIndex</span>
-          </span>
+        <Link
+          href="/"
+          className="flex items-center"
+          aria-label="Index Pool home"
+        >
+          <Image
+            src="/assets/Logo/SVG/Artboard%205.svg"
+            alt="Index Pool"
+            width={184}
+            height={24}
+            priority
+          />
         </Link>
         <nav className="hidden items-center gap-0.5 rounded-xl border border-border bg-secondary p-1.5 md:flex">
           {navItems.map((item) => {

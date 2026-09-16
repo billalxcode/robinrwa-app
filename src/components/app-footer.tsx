@@ -4,7 +4,7 @@ export function AppFooter() {
   return (
     <footer className="border-t border-border bg-background px-6 py-6 text-xs text-muted-foreground md:px-10">
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p>© 2026 RobinRWA.</p>
+        <p>© 2026 Index Pool.</p>
         <nav className="flex items-center gap-4">
           <Link href="/docs" className="hover:text-primary">
             Documentation

@@ -85,7 +85,7 @@ export async function getUsdgDecimals(): Promise<number | null> {
 }
 
 export const web3Metadata = {
-  name: "RobinRWA",
+  name: "Index Pool",
   description: "eIndex dashboard — diversified RWA index positions.",
   url: APP_URL,
   icons: [`${APP_URL}/icon.svg`],
