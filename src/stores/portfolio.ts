@@ -1,6 +1,6 @@
 import { GraphQLClient, gql } from "graphql-request";
 import { create } from "zustand";
-import { SUBGRAPH_URL } from "@/lib/subgraph";
+import { gqlSignal, SUBGRAPH_URL } from "@/lib/subgraph";
 
 // Per-owner portfolio cache + fetch actions. Owns the UserPortfolio GraphQL
 // document so components never fetch it directly: one fetch per wallet per
@@ -166,8 +166,10 @@ export const usePortfolioStore = create<PortfolioState>()((set, get) => ({
     const job = (async () => {
       try {
         const client = new GraphQLClient(SUBGRAPH_URL);
-        const data = await client.request<PortfolioResponse>(PortfolioQuery, {
-          owner: key,
+        const data = await client.request<PortfolioResponse>({
+          document: PortfolioQuery,
+          variables: { owner: key },
+          signal: gqlSignal(),
         });
         const userStats = data.userStats_collection[0] ?? null;
         get().setPortfolio(key, {

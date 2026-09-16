@@ -9,6 +9,14 @@ function getClient(): GraphQLClient | null {
   return new GraphQLClient(SUBGRAPH_URL);
 }
 
+// Bound every GraphQL call: a blackholed endpoint must degrade to null
+// (empty/error UI), never hang the caller forever.
+export const SUBGRAPH_TIMEOUT_MS = 15_000;
+
+export function gqlSignal(ms = SUBGRAPH_TIMEOUT_MS): AbortSignal {
+  return AbortSignal.timeout(ms);
+}
+
 export interface SubgraphTokenCurrent {
   id: string;
   weightBps: number;
@@ -58,12 +66,15 @@ export interface OracleStatus {
   tokens: SubgraphTokenCurrent[];
 }
 
-// Returns null when the endpoint is unset or unreachable — caller shows mock.
+// Returns null when the endpoint is unset, unreachable, or too slow.
 export async function getOracleStatus(): Promise<OracleStatus | null> {
   const client = getClient();
   if (!client) return null;
   try {
-    const data = await client.request<OracleStatusResponse>(OracleStatusQuery);
+    const data = await client.request<OracleStatusResponse>({
+      document: OracleStatusQuery,
+      signal: gqlSignal(),
+    });
     const stats = data.oracleStats_collection[0];
     if (!stats) return null;
     return { stats, tokens: data.tokenCurrents };
@@ -179,7 +190,10 @@ export async function getIndexesLive(): Promise<LiveIndexList | null> {
   const client = getClient();
   if (!client) return null;
   try {
-    const data = await client.request<IndexesResponse>(IndexesQuery);
+    const data = await client.request<IndexesResponse>({
+      document: IndexesQuery,
+      signal: gqlSignal(),
+    });
     const stats = data.factoryStats_collection[0];
     return {
       indexes: data.indexes,
@@ -251,9 +265,13 @@ export async function getIndexDetailLive(
   const client = getClient();
   if (!client) return null;
   try {
-    const data = await client.request<IndexDetailResponse>(IndexDetailQuery, {
-      id,
-      indexId: id,
+    const data = await client.request<IndexDetailResponse>({
+      document: IndexDetailQuery,
+      variables: {
+        id,
+        indexId: id,
+      },
+      signal: gqlSignal(),
     });
     if (!data.index) return null;
     return {
@@ -286,7 +304,10 @@ export async function getOverviewLive(): Promise<{
   const client = getClient();
   if (!client) return null;
   try {
-    const data = await client.request<OverviewResponse>(OverviewQuery);
+    const data = await client.request<OverviewResponse>({
+      document: OverviewQuery,
+      signal: gqlSignal(),
+    });
     const stats = data.factoryStats_collection[0];
     if (!stats) return null;
     return {
@@ -332,9 +353,13 @@ export async function getIndexVolume(
   const client = getClient();
   if (!client) return null;
   try {
-    const data = await client.request<IndexVolumeResponse>(IndexVolumeQuery, {
-      index: indexId,
-      first,
+    const data = await client.request<IndexVolumeResponse>({
+      document: IndexVolumeQuery,
+      variables: {
+        index: indexId,
+        first,
+      },
+      signal: gqlSignal(),
     });
     return data.indexDaySnapshots;
   } catch {

@@ -5,6 +5,7 @@ import {
   getIndexesLive,
   getIndexVolume,
   getOracleStatus,
+  gqlSignal,
   type IndexDayPoint,
   type LiveIndexDetail,
   type LiveIndexList,
@@ -163,9 +164,13 @@ export const useMarketStore = create<MarketState>()((set, get) => ({
     const job = (async () => {
       try {
         const client = new GraphQLClient(SUBGRAPH_URL);
-        const data = await client.request<RecentTxResponse>(RecentTxQuery, {
-          indexId,
-          first: 10,
+        const data = await client.request<RecentTxResponse>({
+          document: RecentTxQuery,
+          variables: {
+            indexId,
+            first: 10,
+          },
+          signal: gqlSignal(),
         });
         set((s) => ({
           recentByIndex: {
