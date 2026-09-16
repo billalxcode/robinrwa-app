@@ -1,4 +1,5 @@
 import { Activity, ArrowRight, ChartLine } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { MarketHydrator } from "@/components/market-hydrator";
 import { Badge } from "@/components/ui/badge";
@@ -34,16 +35,22 @@ const steps = [
     n: "01",
     title: "Deposit USDG Once",
     body: "Connect your wallet on Robinhood Chain and deposit USDG into eIndex.",
+    image: "/assets/Imagery/ascii-art%20(1).png",
+    alt: "Balanced scales illustration",
   },
   {
     n: "02",
     title: "Receive Weighted LP Positions",
     body: "Your deposit splits automatically into LP NFTs across RWA pools by oracle epoch volume weights.",
+    image: "/assets/Imagery/ascii-art%20(2).png",
+    alt: "Figure holding a balance illustration",
   },
   {
     n: "03",
     title: "Track or Remove Anytime",
     body: "Monitor positions in Portfolio, verify weights in Oracle, and remove liquidity whenever you choose.",
+    image: "/assets/Imagery/ascii-art.png",
+    alt: "Justice figure illustration",
   },
 ];
 
@@ -142,6 +149,15 @@ export default async function Home() {
             Explore Indexes
           </Button>
         </div>
+        <Image
+          src="/assets/New%20Branding/Artboard%203-hero.jpg"
+          alt="Index Pool brand banner"
+          width={1500}
+          height={1000}
+          priority
+          sizes="(max-width: 1200px) 100vw, 1200px"
+          className="h-auto w-full rounded-xl border border-border"
+        />
       </div>
 
       {featured && (
@@ -202,7 +218,16 @@ export default async function Home() {
         </p>
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
-            <Card key={s.n} className="rounded-xl">
+            <Card key={s.n} className="overflow-hidden rounded-xl">
+              <div className="relative h-36 w-full">
+                <Image
+                  src={s.image}
+                  alt={s.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover object-top"
+                />
+              </div>
               <CardHeader>
                 <span className="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold tabular-nums text-foreground">
                   {s.n}
@@ -342,6 +367,14 @@ export default async function Home() {
       </Card>
 
       <div className="flex flex-col items-center gap-6 py-8 text-center md:py-12">
+        <Image
+          src="/assets/New%20Branding/Artboard%204-cta.jpg"
+          alt="One Deposit. Infinite Diversification."
+          width={1500}
+          height={500}
+          sizes="(max-width: 1200px) 100vw, 1200px"
+          className="h-auto w-full rounded-xl border border-border"
+        />
         <h2 className="max-w-2xl font-heading text-4xl font-bold md:text-5xl">
           Start Your RWA Index Position
         </h2>
