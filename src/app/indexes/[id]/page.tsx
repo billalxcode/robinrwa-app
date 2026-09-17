@@ -1,5 +1,6 @@
 import { ChartLine } from "lucide-react";
 import { notFound } from "next/navigation";
+import { IndexImage } from "@/components/index-image";
 import { ProvideLiquidityModal } from "@/components/provide-liquidity-modal";
 import { RecentTransactions } from "@/components/recent-transactions";
 import { Reveal } from "@/components/reveal";
@@ -173,6 +174,11 @@ function LiveBody({
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
+              <IndexImage
+                cid={index.imageCID}
+                alt={index.name}
+                className="size-14 rounded-2xl"
+              />
               <h1 className="font-heading text-5xl font-bold tracking-tight">
                 {index.name}
               </h1>

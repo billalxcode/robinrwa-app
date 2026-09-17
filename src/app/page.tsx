@@ -1,6 +1,7 @@
 import { Activity, ArrowRight, ChartLine } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { IndexImage } from "@/components/index-image";
 import { MarketHydrator } from "@/components/market-hydrator";
 import { Reveal } from "@/components/reveal";
 import { Badge } from "@/components/ui/badge";
@@ -165,10 +166,19 @@ export default async function Home() {
         <Reveal delay={0.05}>
           <Card className="rounded-xl">
             <CardHeader>
-              <CardDescription>Featured index</CardDescription>
-              <CardTitle className="text-3xl tabular-nums">
-                {featured.name}
-              </CardTitle>
+              <div className="flex items-center gap-4">
+                <IndexImage
+                  cid={featured.imageCID}
+                  alt={featured.name}
+                  className="size-14 rounded-2xl"
+                />
+                <div>
+                  <CardDescription>Featured index</CardDescription>
+                  <CardTitle className="text-3xl tabular-nums">
+                    {featured.name}
+                  </CardTitle>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap items-center justify-between gap-4">

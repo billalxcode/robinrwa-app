@@ -132,6 +132,7 @@ export interface SubgraphIndex {
   id: string;
   name: string;
   symbol: string;
+  imageCID: string;
   exists: boolean;
   legCount: number;
   tokens: string[];
@@ -163,6 +164,7 @@ const IndexesQuery = gql`
       id
       name
       symbol
+      imageCID
       exists
       legCount
       tokens
@@ -211,6 +213,7 @@ const IndexDetailQuery = gql`
       id
       name
       symbol
+      imageCID
       exists
       legCount
       tokens

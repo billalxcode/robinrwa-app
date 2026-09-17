@@ -1,5 +1,6 @@
 import { ChartLine } from "lucide-react";
 import Link from "next/link";
+import { IndexImage } from "@/components/index-image";
 import { MarketHydrator } from "@/components/market-hydrator";
 import { Reveal } from "@/components/reveal";
 import { Badge } from "@/components/ui/badge";
@@ -119,12 +120,19 @@ export default async function IndexesPage() {
                   {rows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell className="font-medium text-primary">
-                        <Link
-                          href={`/indexes/${row.id}`}
-                          className="hover:underline"
-                        >
-                          {row.name}
-                        </Link>
+                        <span className="flex items-center gap-2.5">
+                          <IndexImage
+                            cid={row.imageCID}
+                            alt={row.name}
+                            className="size-8 rounded-lg"
+                          />
+                          <Link
+                            href={`/indexes/${row.id}`}
+                            className="hover:underline"
+                          >
+                            {row.name}
+                          </Link>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span className="flex flex-wrap gap-1.5">

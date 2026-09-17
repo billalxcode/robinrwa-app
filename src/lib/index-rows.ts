@@ -4,6 +4,7 @@ import type { SubgraphIndex } from "@/lib/subgraph";
 export interface IndexRow {
   id: string;
   name: string;
+  imageCID: string;
   tickers: string[];
   topWeight: string;
   epoch: string;
@@ -33,6 +34,7 @@ export function buildLiveRows(
   return indexes.map((idx) => ({
     id: idx.id,
     name: idx.name,
+    imageCID: idx.imageCID ?? "",
     tickers: idx.tokens.map((a) => assetLabel(getAsset(a))),
     topWeight: topShare(idx.tokens, weights),
     epoch: epoch ?? "—",
