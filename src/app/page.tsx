@@ -4,6 +4,7 @@ import Link from "next/link";
 import { IndexImage } from "@/components/index-image";
 import { MarketHydrator } from "@/components/market-hydrator";
 import { Reveal } from "@/components/reveal";
+import { TokenIcon } from "@/components/token-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,6 +75,7 @@ export default async function Home() {
     ? []
     : (oracle?.tokens ?? []).slice(0, 5).map((t) => ({
         ticker: assetLabel(getAsset(t.id)),
+        logo: getAsset(t.id).logo,
         share: `${(t.weightBps / 100).toFixed(1)}%`,
         bps: t.weightBps,
       }));
@@ -291,9 +293,12 @@ export default async function Home() {
               <div className="flex flex-col gap-4">
                 {topTokens.map((t) => (
                   <div key={t.ticker} className="flex items-center gap-4">
-                    <Badge variant="outline" className="w-20 justify-center">
-                      {t.ticker}
-                    </Badge>
+                    <span className="flex w-24 shrink-0 items-center gap-2">
+                      <TokenIcon src={t.logo} label={t.ticker} />
+                      <span className="truncate text-sm font-medium">
+                        {t.ticker}
+                      </span>
+                    </span>
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full rounded-full bg-primary"
@@ -349,12 +354,19 @@ export default async function Home() {
                   {rows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell className="font-medium text-primary">
-                        <Link
-                          href={`/indexes/${row.id}`}
-                          className="hover:underline"
-                        >
-                          {row.name}
-                        </Link>
+                        <span className="flex items-center gap-2.5">
+                          <IndexImage
+                            cid={row.imageCID}
+                            alt={row.name}
+                            className="size-8 rounded-lg"
+                          />
+                          <Link
+                            href={`/indexes/${row.id}`}
+                            className="hover:underline"
+                          >
+                            {row.name}
+                          </Link>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span className="flex flex-wrap gap-1.5">
