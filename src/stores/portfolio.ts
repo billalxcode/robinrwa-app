@@ -49,7 +49,7 @@ export interface RemoveEvent {
 
 interface PortfolioResponse {
   positions: PositionRow[];
-  indexes: { id: string; name: string }[];
+  indexes: { id: string; name: string; imageCID: string }[];
   userStats_collection: UserStatsFull[];
   liquidityAddeds: DepositEvent[];
   liquidityRemoveds: RemoveEvent[];
@@ -76,6 +76,7 @@ const PortfolioQuery = gql`
     indexes(first: 50) {
       id
       name
+      imageCID
     }
     userStats_collection(where: { id: $owner }) {
       id
@@ -119,6 +120,7 @@ const PortfolioQuery = gql`
 export interface PortfolioCache {
   rows: PositionRow[];
   names: Record<string, string>;
+  images: Record<string, string>;
   deposited: { eth: string; usdg: string };
   stats: UserStatsFull | null;
   deposits: DepositEvent[];
@@ -175,6 +177,9 @@ export const usePortfolioStore = create<PortfolioState>()((set, get) => ({
         get().setPortfolio(key, {
           rows: data.positions,
           names: Object.fromEntries(data.indexes.map((i) => [i.id, i.name])),
+          images: Object.fromEntries(
+            data.indexes.map((i) => [i.id, i.imageCID ?? ""]),
+          ),
           deposited: userStats
             ? { eth: userStats.totalNetETH, usdg: userStats.totalNetUSDG }
             : { eth: "0", usdg: "0" },

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { erc20Abi, formatUnits } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
+import { IndexImage } from "@/components/index-image";
 import { RemovePositionDialog } from "@/components/remove-position-dialog";
 import { Reveal } from "@/components/reveal";
 import { TokenIcon } from "@/components/token-icon";
@@ -67,6 +68,7 @@ export function PortfolioTable() {
   const setSelected = usePortfolioStore((s) => s.setSelected);
   const rows = cache?.rows ?? null;
   const names = cache?.names ?? {};
+  const images = cache?.images ?? {};
   const deposited = cache?.deposited ?? null;
   const stats = cache?.stats ?? null;
   const deposits = cache?.deposits ?? null;
@@ -509,12 +511,19 @@ export function PortfolioTable() {
                         {timeAgo(d.blockTimestamp)}
                       </TableCell>
                       <TableCell className="font-medium">
-                        <Link
-                          href={`/indexes/${d.indexId}`}
-                          className="text-primary hover:underline"
-                        >
-                          {names[d.indexId] ?? `Index ${d.indexId}`}
-                        </Link>
+                        <span className="flex items-center gap-2.5">
+                          <IndexImage
+                            cid={images[d.indexId] ?? ""}
+                            alt={names[d.indexId] ?? `Index ${d.indexId}`}
+                            className="size-8 rounded-lg"
+                          />
+                          <Link
+                            href={`/indexes/${d.indexId}`}
+                            className="text-primary hover:underline"
+                          >
+                            {names[d.indexId] ?? `Index ${d.indexId}`}
+                          </Link>
+                        </span>
                       </TableCell>
                       <TableCell className="tabular-nums">
                         {fmtNet(d)}
