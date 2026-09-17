@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { PortfolioTable } from "@/components/portfolio-table";
+
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description: "Your Index Pool liquidity NFT positions by connected wallet.",
+  alternates: { canonical: "/portfolio" },
+  robots: { index: false, follow: true },
+};
 
 export default function PortfolioPage() {
   return (

@@ -1,4 +1,5 @@
 import { ChartLine } from "lucide-react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { IndexImage } from "@/components/index-image";
 import { ProvideLiquidityModal } from "@/components/provide-liquidity-modal";
@@ -79,6 +80,22 @@ function dayToDate(day: string): string {
   const month = `${d.getUTCMonth() + 1}`.padStart(2, "0");
   const date = `${d.getUTCDate()}`.padStart(2, "0");
   return `${d.getUTCFullYear()}-${month}-${date}`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  if (isIndexHidden(id)) return { title: "Index" };
+  const detail = await getIndexDetailLive(id).catch(() => null);
+  if (!detail) return { title: "Index" };
+  return {
+    title: detail.index.name,
+    description: `Deposit USDG into ${detail.index.name} and hold volume-weighted RWA LP positions on Robinhood Chain.`,
+    alternates: { canonical: `/indexes/${id}` },
+  };
 }
 
 export default async function IndexDetailPage({

@@ -1,4 +1,5 @@
 import { Activity, ExternalLink } from "lucide-react";
+import type { Metadata } from "next";
 import { MarketHydrator } from "@/components/market-hydrator";
 import { Reveal } from "@/components/reveal";
 import { TokenIcon } from "@/components/token-icon";
@@ -29,6 +30,13 @@ import {
 import { assetLabel, getAsset } from "@/lib/assets";
 import { getOracleStatus, hoursSince } from "@/lib/subgraph";
 import { explorerTokenUrl } from "@/lib/web3";
+
+export const metadata: Metadata = {
+  title: "Oracle",
+  description:
+    "Weight oracle status and latest push for Index Pool RWA indexes.",
+  alternates: { canonical: "/oracle" },
+};
 
 export default async function OraclePage() {
   const live = await getOracleStatus();

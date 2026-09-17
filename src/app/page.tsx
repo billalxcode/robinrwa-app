@@ -1,4 +1,5 @@
 import { Activity, ArrowRight, ChartLine } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { IndexImage } from "@/components/index-image";
@@ -32,6 +33,13 @@ import {
 import { assetLabel, getAsset } from "@/lib/assets";
 import { buildLiveRows, isIndexHidden } from "@/lib/index-rows";
 import { getIndexesLive, getOracleStatus, hoursSince } from "@/lib/subgraph";
+
+export const metadata: Metadata = {
+  title: "One Deposit. Weighted RWA Liquidity.",
+  description:
+    "Deposit USDG once and hold volume-weighted LP positions across RWA pools on Robinhood Chain.",
+  alternates: { canonical: "/" },
+};
 
 const steps = [
   {

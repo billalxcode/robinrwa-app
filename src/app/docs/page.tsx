@@ -1,4 +1,5 @@
 import { BookOpenText } from "lucide-react";
+import type { Metadata } from "next";
 import { Reveal } from "@/components/reveal";
 import {
   Empty,
@@ -7,6 +8,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+
+export const metadata: Metadata = {
+  title: "Documentation",
+  description: "Guides and contract specs for Index Pool.",
+  alternates: { canonical: "/docs" },
+  robots: { index: false, follow: true },
+};
 
 export default function DocsPage() {
   return (

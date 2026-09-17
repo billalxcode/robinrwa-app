@@ -1,4 +1,5 @@
 import { ChartLine } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { IndexImage } from "@/components/index-image";
 import { MarketHydrator } from "@/components/market-hydrator";
@@ -28,6 +29,13 @@ import {
 } from "@/components/ui/table";
 import { buildLiveRows, isIndexHidden } from "@/lib/index-rows";
 import { getIndexesLive, getOracleStatus } from "@/lib/subgraph";
+
+export const metadata: Metadata = {
+  title: "Indexes",
+  description:
+    "Browse RWA indexes on Robinhood Chain. One deposit per index, split by global volume weight.",
+  alternates: { canonical: "/indexes" },
+};
 
 export default async function IndexesPage() {
   const [list, oracle] = await Promise.all([
