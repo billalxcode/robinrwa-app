@@ -378,12 +378,19 @@ export function PortfolioTable() {
                           </Link>
                         </TableCell>
                         <TableCell className="font-medium text-primary">
-                          <Link
-                            href={`/indexes/${r.index.id}`}
-                            className="hover:underline"
-                          >
-                            {names[r.index.id] ?? `Index ${r.index.id}`}
-                          </Link>
+                          <span className="flex items-center gap-2.5">
+                            <IndexImage
+                              cid={images[r.index.id] ?? ""}
+                              alt={names[r.index.id] ?? `Index ${r.index.id}`}
+                              className="size-8 rounded-lg"
+                            />
+                            <Link
+                              href={`/indexes/${r.index.id}`}
+                              className="hover:underline"
+                            >
+                              {names[r.index.id] ?? `Index ${r.index.id}`}
+                            </Link>
+                          </span>
                         </TableCell>
                         <TableCell>
                           {pool ? (
