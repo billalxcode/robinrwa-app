@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buildLiveRows } from "@/lib/index-rows";
+import { buildLiveRows, isIndexHidden } from "@/lib/index-rows";
 import { getIndexesLive, getOracleStatus } from "@/lib/subgraph";
 
 export default async function IndexesPage() {
@@ -67,7 +67,11 @@ export default async function IndexesPage() {
   const weights = new Map(
     oracle.tokens.map((t) => [t.id.toLowerCase(), t.weightBps]),
   );
-  const rows = buildLiveRows(list.indexes, weights, oracle.stats.epoch);
+  const rows = buildLiveRows(
+    list.indexes.filter((i) => !isIndexHidden(i.id)),
+    weights,
+    oracle.stats.epoch,
+  );
 
   return (
     <>

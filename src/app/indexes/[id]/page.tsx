@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/table";
 import { VolumeChart, type VolumePoint } from "@/components/volume-chart";
 import { assetLabel, getAsset } from "@/lib/assets";
-import { weightMap } from "@/lib/index-rows";
+import { isIndexHidden, weightMap } from "@/lib/index-rows";
 import {
   formatDate,
   getIndexDetailLive,
@@ -87,6 +87,7 @@ export default async function IndexDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  if (isIndexHidden(id)) notFound();
   const [live, oracle, snapshots, usdgDecimals] = await Promise.all([
     getIndexDetailLive(id),
     getOracleStatus(),

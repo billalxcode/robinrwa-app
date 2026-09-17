@@ -1,6 +1,15 @@
 import { assetLabel, getAsset } from "@/lib/assets";
 import type { SubgraphIndex } from "@/lib/subgraph";
 
+// Indexes hidden across the whole frontend: not listed, not openable,
+// not depositable. Compare as strings (subgraph ids arrive as strings,
+// route params too).
+export const BLACKLISTED_INDEX_IDS: ReadonlySet<string> = new Set(["0"]);
+
+export function isIndexHidden(id: string | number | bigint): boolean {
+  return BLACKLISTED_INDEX_IDS.has(String(id));
+}
+
 export interface IndexRow {
   id: string;
   name: string;

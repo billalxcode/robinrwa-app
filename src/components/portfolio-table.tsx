@@ -42,6 +42,7 @@ import {
   indexRouterAbi,
   positionManagerAbi,
 } from "@/lib/contracts";
+import { isIndexHidden } from "@/lib/index-rows";
 import { hoursSince, timeAgo } from "@/lib/subgraph";
 import { explorerTxUrl, uniswapPositionUrl } from "@/lib/web3";
 import type { DepositEvent } from "@/stores/portfolio";
@@ -66,12 +67,16 @@ export function PortfolioTable() {
   const fetchPortfolio = usePortfolioStore((s) => s.fetchPortfolio);
   const selectedTokenId = usePortfolioStore((s) => s.selectedTokenId);
   const setSelected = usePortfolioStore((s) => s.setSelected);
-  const rows = cache?.rows ?? null;
+  const rows = cache
+    ? cache.rows.filter((r) => !isIndexHidden(r.index.id))
+    : null;
   const names = cache?.names ?? {};
   const images = cache?.images ?? {};
   const deposited = cache?.deposited ?? null;
   const stats = cache?.stats ?? null;
-  const deposits = cache?.deposits ?? null;
+  const deposits = cache
+    ? cache.deposits.filter((d) => !isIndexHidden(d.indexId))
+    : null;
   const removals = cache?.removals ?? null;
   const selected = rows?.find((r) => r.tokenId === selectedTokenId) ?? null;
   const [reconnectTimedOut, setReconnectTimedOut] = useState(false);

@@ -30,7 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { assetLabel, getAsset } from "@/lib/assets";
-import { buildLiveRows } from "@/lib/index-rows";
+import { buildLiveRows, isIndexHidden } from "@/lib/index-rows";
 import { getIndexesLive, getOracleStatus, hoursSince } from "@/lib/subgraph";
 
 const steps = [
@@ -69,7 +69,11 @@ export default async function Home() {
   const epoch = oracle?.stats.epoch ?? null;
   const rows = unavailable
     ? []
-    : buildLiveRows(list?.indexes ?? [], weights, epoch ?? "—");
+    : buildLiveRows(
+        (list?.indexes ?? []).filter((i) => !isIndexHidden(i.id)),
+        weights,
+        epoch ?? "—",
+      );
 
   const topTokens = unavailable
     ? []
@@ -84,13 +88,13 @@ export default async function Home() {
   const featured = rows.find((r) => r.status === "Active") ?? rows[0];
   const depositHref = featured ? `/indexes/${featured.id}` : "/indexes";
 
+  const activeRows = rows.filter((r) => r.status === "Active");
+
   const stats = [
     {
       label: "Total Active",
-      value: unavailable ? "—" : String(list?.totalActive ?? 0),
-      note: unavailable
-        ? "Subgraph unavailable"
-        : `${list?.totalCreated ?? 0} created`,
+      value: unavailable ? "—" : String(activeRows.length),
+      note: unavailable ? "Subgraph unavailable" : `${rows.length} listed`,
     },
     {
       label: "Oracle Epoch",
