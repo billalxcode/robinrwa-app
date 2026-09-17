@@ -1,7 +1,10 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-// Brand OG image (1200x630): parchment field, copper diamond mark,
-// wordmark + tagline. Dok: /vercel/next.js — opengraph-image.tsx.
+// Brand OG image (1200x630): parchment field, official walnut mark tile
+// (New Branding Artboard 6), wordmark + tagline.
+// Dok: /vercel/next.js — opengraph-image.tsx.
 export const alt = "Index Pool | RWA Index on Robinhood Chain";
 export const size = {
   width: 1200,
@@ -9,7 +12,11 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default function Image() {
+export default async function Image() {
+  const logo = await readFile(
+    join(process.cwd(), "public/assets/New Branding/Artboard 6.png"),
+  );
+  const src = `data:image/png;base64,${logo.toString("base64")}` as const;
   return new ImageResponse(
     <div
       style={{
@@ -22,26 +29,14 @@ export default function Image() {
         background: "#F4F1EA",
       }}
     >
-      <div
-        style={{
-          width: 120,
-          height: 120,
-          background: "#542B15",
-          transform: "rotate(45deg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            background: "#E8D6A4",
-            transform: "rotate(0deg)",
-          }}
-        />
-      </div>
+      {/* biome-ignore lint/performance/noImgElement: satori ImageResponse requires raw img; next/image unsupported here */}
+      <img
+        src={src}
+        width={160}
+        height={160}
+        alt="Index Pool mark"
+        style={{ borderRadius: 28 }}
+      />
       <div
         style={{
           display: "flex",
