@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { robinscanLogo } from "@/lib/assets";
 import { ipfsUrl } from "@/lib/ipfs";
+import { cn } from "@/lib/utils";
 
 // Index artwork from the on-chain imageCID via the IPFS gateway.
 // Indexes without an image always show the Robinhood logo.
@@ -21,7 +21,9 @@ export function IndexImage({
   imageClassName?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const url = failed ? robinscanLogo("HOOD") : (ipfsUrl(cid) ?? robinscanLogo("HOOD"));
+  const url = failed
+    ? robinscanLogo("HOOD")
+    : (ipfsUrl(cid) ?? robinscanLogo("HOOD"));
   return (
     <span
       className={cn(
@@ -35,7 +37,7 @@ export function IndexImage({
         fill
         sizes="80px"
         className={cn("object-cover", imageClassName)}
-        onError={() => setStage((s) => (s === "ipfs" ? "hood" : "icon"))}
+        onError={() => setFailed(true)}
       />
     </span>
   );
