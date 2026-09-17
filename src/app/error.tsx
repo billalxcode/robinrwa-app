@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/empty";
 
 // Route error boundary (dok: /vercel/next.js — error.tsx, reset()).
-export default function Error({
+export default function RouteError({
   error,
   reset,
 }: {
